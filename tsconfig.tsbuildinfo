@@ -1,1 +1,0 @@
-{"root":["./src/api.ts","./src/contracts.ts","./src/live.ts","./src/main.tsx","./src/pages.tsx","./src/state.ts","./src/components/ui/button.tsx","./src/lib/money.ts","./src/lib/utils.ts","./src/mocks/browser.ts","./src/mocks/data.ts","./src/mocks/handlers.ts","./src/mocks/socket.ts","./vite.config.ts"],"version":"5.9.3"}

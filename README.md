@@ -1,112 +1,179 @@
-# KURIO — NFT Marketplace · Frontend Challenge
+# KURIO — NFT Marketplace
 
-Primeira implementação da interface **Kurio**, reproduzida a partir dos **15 frames desktop/mobile fornecidos na conversa** (capturas do Figma). A solução é uma **demonstração técnica**, sem blockchain, transações financeiras ou carteiras reais.
+**Frontend Challenge · React + TypeScript · demonstração de marketplace NFT**
 
-## Status desta entrega
+- **Demo pública:** https://kurio-nft-marketplace-six.vercel.app/
+- **Código-fonte:** https://github.com/Goatjs/kurio-nft-marketplace
+- **Referência visual:** [Frontend Challenge no Figma](https://www.figma.com/design/Ff0SksUi7UFtPWUO8kyNtw/Frontend-Challenge?node-id=0-1)
 
-**Etapa 1 (implementada no código):** identidade visual Kurio, imagens recortadas das capturas do usuário, Home/mercado com URL de busca/filtros/ordenação/paginação, detalhe, favoritos com atualização otimista e rollback, carrinho com persistência e cupom, cálculo exato de ETH usando `bigint`, autenticação com duas contas de teste, checkout simulado, confirmação pendente/confirmada/recusada, perfil com alteração de senha, carteiras principal/secundária, Axios, TanStack Query/Router, REST via MSW, Socket.IO com binding MSW, testes Playwright iniciais e documentação.
+> **Projeto demonstrativo.** Pagamentos, carteiras, blockchain, autenticação e backend são simulados em navegador por Mock Service Worker (MSW). Nenhum NFT real é transferido e nenhuma transação financeira é executada. Não use credenciais pessoais ou dados reais.
 
-**Não validado neste ambiente:** instalação npm, TypeScript completo, execução do Vite, testes Playwright, Lighthouse e deploy. O ambiente de geração estava sem DNS de acesso a `registry.npmjs.org`, portanto **não foi possível instalar dependências, criar lockfile ou verificar o build**. Os módulos TypeScript foram verificados quanto à **sintaxe** com `typescript.transpileModule`, mas isso **não substitui** typecheck e teste real. A entrega **não deve ser confundida com challenge 100% concluído**.
+## Funcionalidades
 
-**Trabalho pendente:** aprovação pixel-a-pixel do Figma via inspeção no navegador, assets individuais originais (os recortes têm qualidade de referência), revisão de contratos e fluxos de falha complexos, cenários de eventos duplicados e reconexão, regressão visual com baselines versionadas, auditorias completas Lighthouse, lockfile e deploy público.
+- Home e catálogo com pesquisa, categoria, rede, preço máximo, ordenação e paginação sincronizados com a URL e o histórico do navegador.
+- Detalhes de NFT, galeria, indicadores de disponibilidade e preço em tempo real simulado.
+- Favoritos com atualização otimista e reversão em falhas.
+- Carrinho de visitante com persistência entre recarregamentos e mesclagem após login.
+- Cupom `SAVE10`, cotação e total calculados com precisão decimal usando `bigint` em wei.
+- Login, cadastro, perfil e carteiras **fictícios**, com duas contas de demonstração.
+- Checkout e pedidos simulados com cotação assinada, idempotência, detecção de mudanças de preço, recuperação após timeout e estados pendente/confirmado/recusado.
+- Eventos `nft.updated` e `order.updated` via cliente Socket.IO, com WebSocket emulado por MSW.
+- Estados de loading, skeleton, rede lenta, indisponibilidade e erros de API.
+- Layout responsivo projetado para desktop, tablet e mobile.
 
-## Requisitos
+## Stack
 
-- Node.js 22+ e npm 10+
-- Navegador Chromium para Playwright
-- Acesso ao registro do npm na máquina de desenvolvimento
+| Camada | Tecnologia |
+|---|---|
+| Aplicação | React 19, TypeScript, Vite 6 |
+| Navegação | TanStack Router |
+| Cache e estado remoto | TanStack Query |
+| HTTP | Axios |
+| Realtime | Socket.IO Client + `@mswjs/socket.io-binding` |
+| API e dados simulados | Mock Service Worker (MSW), `localStorage` |
+| Estilos | Tailwind CSS, componentes Radix/shadcn e CSS responsivo |
+| Qualidade | ESLint, TypeScript, Playwright, Lighthouse CI |
+| Hospedagem | Vercel com fallback SPA em `vercel.json` |
 
-## Instalação e execução
+Detalhes dos contratos, decisões e limitações estão em [`ARCHITECTURE.md`](./ARCHITECTURE.md).
+
+## Evidências de validação
+
+Resultados reportados após execução em Windows/Chrome, em **02/11/2026**. As pontuações podem variar conforme hardware, navegador e rede.
+
+| Verificação | Resultado |
+|---|---|
+| `npm run lint` | **Aprovado — 0 erros** |
+| `npm run build` | **Aprovado** (aviso não bloqueante sobre chunk >500 KB) |
+| `npm audit --omit=dev` | **0 vulnerabilidades conhecidas** na execução registrada |
+| Playwright funcional local | **28/28 aprovados** (desktop + mobile) |
+| Playwright visual local | **12/12 aprovados** (390, 768 e 1440 px) |
+| Playwright funcional no domínio Vercel | **28/28 aprovados** (desktop + mobile) |
+| Deploy Vercel | **Production READY** na branch `main` |
+
+### Lighthouse — build de produção, 3 medições por página e perfil
+
+| Perfil | Página | Performance | Accessibility | Best Practices | SEO | LCP | CLS | TBT |
+|---|---|---:|---:|---:|---:|---:|---:|---:|
+| Mobile | Início | 91 | 98 | 96 | 92 | 3197 ms | 0.027 | 37 ms |
+| Mobile | Detalhes | 90 | 100 | 96 | 92 | 3127 ms | 0.000 | 128 ms |
+| Desktop | Início | 99 | 100 | 96 | 92 | 771 ms | 0.000 | 0 ms |
+| Desktop | Detalhes | 99 | 100 | 96 | 92 | 815 ms | 0.000 | 0 ms |
+
+**Metas atendidas:** Performance ≥90, Accessibility ≥95, Best Practices ≥95 e SEO ≥90. Valores de LCP, CLS e TBT são medianas independentes. As auditorias foram feitas no preview local do **build de produção** com mocks ativados; não são medições de usuários reais da Vercel. Os relatórios HTML/JSON são gerados localmente em `lighthouse-reports/` (ignorado pelo Git).
+
+**Regressão visual:** os 12 testes comparam telas a snapshots Playwright versionados; isso não equivale a comprovação de fidelidade pixel-a-pixel com o arquivo Figma. Os assets foram recortados das referências recebidas; uma entrega de design ainda pode ser refinada com exportação de imagens originais e revisão manual.
+
+## Como executar localmente
+
+**Requisitos:** Node.js 22+ (recomendado) e npm; Chromium instalado para os testes Playwright.
 
 ```bash
-npm install
+npm ci
 npm run dev
 ```
 
-O `postinstall` gera `public/mockServiceWorker.js` com `msw init`. Crie `package-lock.json` executando `npm install` e **versione** o arquivo antes da entrega final.
+Abra `http://localhost:5173`. O script `postinstall` executa `msw init public --save`; `public/mockServiceWorker.js` também está versionado.
 
-Abra `http://localhost:5173`. Opcional: copie `.env.example` para `.env`.
+### Comandos de qualidade
 
 ```bash
-npm run typecheck
 npm run lint
 npm run build
-npm run preview
 npx playwright install chromium
-npm run test:e2e
-npm run test:e2e:report
-npm run audit
+npx playwright test
+npx playwright test --config=playwright.visual.config.ts
 ```
 
-## Credenciais fictícias
+Não utilize `--update-snapshots` numa validação normal: alterar baselines sem revisão pode esconder regressões. Para validar o **domínio público** (não localhost), use o `playwright.public.config.ts` presente neste repositório:
 
-| Usuário | E-mail | Senha |
+```bash
+npx playwright test --config=playwright.public.config.ts
+```
+
+O arquivo de testes públicos usa `baseURL: https://kurio-nft-marketplace-six.vercel.app`, sem iniciar servidor local. Os cenários REST e Socket.IO continuam mockados.
+
+### Lighthouse (perfil local de produção)
+
+```bash
+npm run build
+npx lhci autorun --config=./lighthouserc.mobile.json
+npx lhci autorun --config=./lighthouserc.desktop.json
+node scripts/lighthouse-summary.mjs
+```
+
+**Atenção:** o resumo exige exatamente **3 medições por perfil e rota**. Se já tiver relatórios de uma execução anterior, mova ou renomeie `lighthouse-reports/` antes da nova auditoria. Os comandos Lighthouse geram novos arquivos nessa pasta.
+
+## Credenciais e dados fictícios
+
+| Conta de teste | E-mail | Senha |
 |---|---|---|
 | Alex | `alex@example.test` | `Demo123!` |
 | Sam | `sam@example.test` | `Demo456!` |
 
-As senhas são hashes de demonstração dentro da base do MSW, **não representam autenticação segura para produção**. Ao cadastrar nova conta, cadastre uma carteira fictícia em `/wallets` para realizar o checkout.
+O token demonstrativo é salvo em `localStorage` apenas para exercício dos cenários do desafio. **Isso não é autenticação segura para um serviço real.** Para uma carteira fictícia nova, use a página `/wallets` antes do checkout.
 
-## Cenários de falha
+Cupom válido: `SAVE10`.
 
-No DevTools do navegador (Application > Local Storage), defina `nft-scenario` como:
+### Simular falhas
 
-- `slow` — listagem lenta (skeleton com shimmer).
-- `offline` — erro de rede para as rotas com simulação de rede.
-- `http500` — falha 503 do catálogo.
-- `timeout` — criação do pedido no MSW seguida de HTTP 504; recuperação pela chave de idempotência.
-- `declined` — rodada do pedido termina como recusada.
+No DevTools → Application → Local Storage, defina a chave `nft-scenario` como `slow`, `offline`, `http500`, `timeout` ou `declined` para testar os cenários de rede e pedidos documentados em `ARCHITECTURE.md`.
 
-Para retornar ao estado padrão, execute no console do navegador:
+Para retornar aos dados iniciais, remova `nft-scenario` e execute no Console:
 
 ```js
-fetch('/api/demo/reset',{method:'POST'}).then(()=>location.reload())
+fetch('/api/demo/reset', { method: 'POST' }).then(() => location.reload())
 ```
 
-Remova também `nft-scenario` do Local Storage para cancelar falhas. Como alternativa, execute `localStorage.removeItem('nft-scenario')`.
+O estado mock é local ao navegador/origem: contas, carrinhos e pedidos simulados **não** compõem um banco de dados compartilhado entre visitantes.
 
-O cupom de demonstração é `SAVE10`. Erros de cupom são gerados no MSW.
+## Páginas
 
-## Rotas
+| Rota | Descrição |
+|---|---|
+| `/` | Home e catálogo |
+| `/market` | Catálogo |
+| `/nfts/:nftId` | Detalhe do NFT |
+| `/cart` | Carrinho |
+| `/checkout` | Pagamento fictício e revisão |
+| `/orders/:orderId` | Status e recibo fictício |
+| `/login`, `/register` | Conta de demonstração |
+| `/profile` | Perfil |
+| `/wallets` | Carteiras de demonstração |
 
-- `/` — início e catálogo
-- `/market` — catálogo
-- `/nfts/:nftId` — detalhe
-- `/cart` — carrinho
-- `/checkout` — pagamento simulado, com revisão
-- `/orders/:orderId` — recibo e estado do pedido
-- `/login` e `/register` — conta
-- `/profile` — perfil
-- `/wallets` — carteiras
+Exemplo de filtros na URL: `/?q=ape&category=all&sort=price_asc&page=1&maxPrice=3.00&network=Ethereum`.
 
-URL da busca/filtros: `/?q=ape&category=Arte%20digital&sort=price_asc&page=1&maxPrice=3.00&network=Ethereum`.
-
-## Origem do visual
-
-Fonte das imagens: screenshots enviados pelo usuário, especialmente `Detalhes do NFT.png` e `Início(1).png`. As artes foram **recortadas manualmente dos frames** e estão no diretório `public/assets/*.webp`, sem copiar imagens externas nem criar NFTs novos. Para qualidade final, substitua-as pelos **assets originais exportados do Figma**.
-
-O design de referência é o arquivo **Frontend Challenge**, Figma: `Ff0SksUi7UFtPWUO8kyNtw`.
-
-## Estrutura
+## Estrutura resumida
 
 ```text
 src/
-  api.ts                 # Axios e funções REST tipadas
-  contracts.ts           # Tipos compartilhados do domínio
-  live.ts                # socket.io-client e reconciliação de query cache
-  state.ts               # sessão e Query hooks
-  main.tsx               # TanStack Router + Query provider
-  pages.tsx              # Páginas, layout, formulários e componentes iniciais
-  styles.css             # Tokens e estilos responsivos Kurio
-  lib/money.ts           # Aritmética decimal exata em wei (bigint)
-  mocks/
-    data.ts              # Fixtures, persistência, reset e estado simulado
-    handlers.ts          # Contratos REST e mutações
-    socket.ts            # @mswjs/socket.io-binding + eventos
-public/assets/           # Artes da referência
-public/mockServiceWorker.js (gerado pelo postinstall)
-tests/catalog.spec.ts    # Testes E2E iniciais
-ARCHITECTURE.md          # Decisões, contratos e limitações
+  api.ts               Axios e endpoints tipados
+  contracts.ts         Tipos compartilhados
+  main.tsx             TanStack Router, Query e inicialização MSW
+  pages.tsx            Layout e páginas
+  styles.css           Estilos e breakpoints
+  state.ts             Sessão, queries e mutations
+  live.ts              Assinaturas Socket.IO
+  lib/money.ts         Cálculos ETH/wei com bigint
+  mocks/               Fixtures, handlers REST, eventos e persistência
+public/                Assets e worker MSW
+scripts/               Consolidação das auditorias Lighthouse
+tests/                 Testes funcionais Playwright
+visual-tests/          Testes e snapshots visuais
+referencias-figma/     Capturas de referência
+playwright.public.config.ts   Testes contra Vercel
+vercel.json            Fallback SPA
+ARCHITECTURE.md        Arquitetura, contratos e limitações
+PLAN.md                Registro das etapas
 ```
 
-Os links de Criadores, Aprenda e redes sociais são exibidos como itens de interface **não funcionais**, pois estão fora do escopo do challenge. Botões de OAuth estão **desabilitados**, evitando simular autenticação real.
+## Limitações conhecidas e próximos refinamentos
+
+- Sem blockchain, contratos, carteiras, login social nem pagamentos reais.
+- Backend simulado no navegador; não substitui API, autenticação ou persistência reais.
+- Snapshots visuais não substituem inspeção pixel-a-pixel contra o Figma. Recomenda-se usar assets originais exportados do design quando disponíveis.
+- Links institucionais e de redes sociais exibidos apenas como parte do layout podem não ter destinos funcionais; botões OAuth permanecem desativados.
+- Casos avançados adicionais (eventos duplicados/fora de ordem e recuperação sob desconexões prolongadas) podem ampliar a cobertura, embora os cenários exigidos executados estejam aprovados.
+- Há aviso de chunk JS >500 KB no Vite. O build e as metas Lighthouse passaram; uma divisão adicional do bundle é possível.
+
+**Uso pretendido:** avaliação de frontend e demonstração técnica, não operação comercial ou financeira.
