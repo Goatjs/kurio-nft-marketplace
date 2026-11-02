@@ -2,12 +2,17 @@ import React from 'react';
 import {createRoot} from 'react-dom/client';
 import {QueryClient,QueryClientProvider} from '@tanstack/react-query';
 import {createRootRoute,createRoute,createRouter,RouterProvider} from '@tanstack/react-router';
-import {CartPage,CheckoutPage,Detail,Home,Market,Layout,NotFound,OrderPage,ProfilePage,WalletsPage} from './pages';
+import {CartPage,CheckoutPage,Detail,Home,Market,Layout,NotFound,OrderPage} from './pages';
 import './styles.css';
 const LoginPage = React.lazy(() => import('./auth-pages').then(m => ({default: m.LoginPage})));
 const RegisterPage = React.lazy(() => import('./auth-pages').then(m => ({default: m.RegisterPage})));
 function LoginRoute(){return <React.Suspense fallback={<div role="status" className="panel">Carregando...</div>}><LoginPage/></React.Suspense>}
 function RegisterRoute(){return <React.Suspense fallback={<div role="status" className="panel">Carregando...</div>}><RegisterPage/></React.Suspense>}
+
+const ProfilePage = React.lazy(() => import('./account-pages').then(m => ({default: m.ProfilePage})));
+const WalletsPage = React.lazy(() => import('./account-pages').then(m => ({default: m.WalletsPage})));
+function ProfileRoute(){return <React.Suspense fallback={<div role="status" className="panel">Carregando...</div>}><ProfilePage/></React.Suspense>}
+function WalletsRoute(){return <React.Suspense fallback={<div role="status" className="panel">Carregando...</div>}><WalletsPage/></React.Suspense>}
 
 const root=createRootRoute({component:Layout,notFoundComponent:NotFound});
 const index=createRoute({getParentRoute:()=>root,path:'/',component:Home,validateSearch:(s:Record<string,unknown>)=>({q:typeof s.q==='string'?s.q:'',category:typeof s.category==='string'?s.category:'all',sort:s.sort==='price_asc'||s.sort==='price_desc'||s.sort==='newest'?s.sort:'popular',page:Math.max(1,Number(s.page)||1),maxPrice:typeof s.maxPrice==='string'?s.maxPrice:'',network:typeof s.network==='string'?s.network:'all'})});
@@ -18,8 +23,8 @@ const checkout=createRoute({getParentRoute:()=>root,path:'/checkout',component:C
 const order=createRoute({getParentRoute:()=>root,path:'/orders/$orderId',component:OrderPage});
 const login=createRoute({getParentRoute:()=>root,path:'/login',component:LoginRoute});
 const register=createRoute({getParentRoute:()=>root,path:'/register',component:RegisterRoute});
-const profile=createRoute({getParentRoute:()=>root,path:'/profile',component:ProfilePage});
-const wallets=createRoute({getParentRoute:()=>root,path:'/wallets',component:WalletsPage});
+const profile=createRoute({getParentRoute:()=>root,path:'/profile',component:ProfileRoute});
+const wallets=createRoute({getParentRoute:()=>root,path:'/wallets',component:WalletsRoute});
 const routeTree=root.addChildren([index,market,detail,cart,checkout,order,login,register,profile,wallets]);
 const router=createRouter({routeTree,defaultPreload:'intent'});
 declare module '@tanstack/react-router'{interface Register{router:typeof router}}
