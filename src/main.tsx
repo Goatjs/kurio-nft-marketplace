@@ -2,7 +2,7 @@ import React from 'react';
 import {createRoot} from 'react-dom/client';
 import {QueryClient,QueryClientProvider} from '@tanstack/react-query';
 import {createRootRoute,createRoute,createRouter,RouterProvider} from '@tanstack/react-router';
-import {Detail,Home,Market,Layout,NotFound} from './pages';
+import {Home,Market,Layout,NotFound} from './pages';
 import './styles.css';
 const LoginPage = React.lazy(() => import('./auth-pages').then(m => ({default: m.LoginPage})));
 const RegisterPage = React.lazy(() => import('./auth-pages').then(m => ({default: m.RegisterPage})));
@@ -21,10 +21,22 @@ function CartRoute(){return <React.Suspense fallback={<div role="status" classNa
 function CheckoutRoute(){return <React.Suspense fallback={<div role="status" className="panel">Carregando...</div>}><CheckoutPage/></React.Suspense>}
 function OrderRoute(){return <React.Suspense fallback={<div role="status" className="panel">Carregando...</div>}><OrderPage/></React.Suspense>}
 
+const Detail = React.lazy(() =>
+  import('./detail-pages').then(m => ({default: m.Detail}))
+);
+
+function DetailRoute(){
+  return <React.Suspense
+    fallback={<div role="status" className="panel">Carregando...</div>}
+  >
+    <Detail/>
+  </React.Suspense>;
+}
+
 const root=createRootRoute({component:Layout,notFoundComponent:NotFound});
 const index=createRoute({getParentRoute:()=>root,path:'/',component:Home,validateSearch:(s:Record<string,unknown>)=>({q:typeof s.q==='string'?s.q:'',category:typeof s.category==='string'?s.category:'all',sort:s.sort==='price_asc'||s.sort==='price_desc'||s.sort==='newest'?s.sort:'popular',page:Math.max(1,Number(s.page)||1),maxPrice:typeof s.maxPrice==='string'?s.maxPrice:'',network:typeof s.network==='string'?s.network:'all'})});
 const market=createRoute({getParentRoute:()=>root,path:'/market',component:Market,validateSearch:(s:Record<string,unknown>)=>({q:typeof s.q==='string'?s.q:'',category:typeof s.category==='string'?s.category:'all',sort:s.sort==='price_asc'||s.sort==='price_desc'||s.sort==='newest'?s.sort:'popular',page:Math.max(1,Number(s.page)||1),maxPrice:typeof s.maxPrice==='string'?s.maxPrice:'',network:typeof s.network==='string'?s.network:'all'})});
-const detail=createRoute({getParentRoute:()=>root,path:'/nfts/$nftId',component:Detail});
+const detail=createRoute({getParentRoute:()=>root,path:'/nfts/$nftId',component:DetailRoute});
 const cart=createRoute({getParentRoute:()=>root,path:'/cart',component:CartRoute});
 const checkout=createRoute({getParentRoute:()=>root,path:'/checkout',component:CheckoutRoute});
 const order=createRoute({getParentRoute:()=>root,path:'/orders/$orderId',component:OrderRoute});
