@@ -1,0 +1,12 @@
+export type Edition = 'Standard'|'Rare'|'Legendary';
+export type Sort = 'popular'|'price_asc'|'price_desc'|'newest';
+export type Nft = {id:string;title:string;creator:string;category:string;network:'Ethereum'|'Polygon'|'Solana';edition:Edition;priceEth:string;stock:number;image:string;description:string;version:number};
+export type CatalogFilters={q:string;category:string;sort:Sort;page:number;maxPrice?:string;network?:string};
+export type CatalogResult={items:Nft[];total:number;page:number;pageSize:number};
+export type CartItem={nftId:string;quantity:number};
+export type Cart={items:CartItem[];coupon:string|null};
+export type Quote={id:string;items:Array<CartItem&{unitPriceEth:string;lineEth:string;version:number;title:string;image:string}>;subtotalEth:string;discountEth:string;networkFeeEth:string;totalEth:string;coupon:string|null;expiresAt:number;signature:string};
+export type User={id:string;email:string;name:string;avatar:string;username?:string;ens?:string;walletAlias?:string};
+export type Wallet={id:string;label:string;address:string;network:'Ethereum'|'Polygon';primary:boolean};
+export type Order={id:string;userId:string;status:'pending'|'confirmed'|'declined';createdAt:number;quote:Quote;walletId:string;key:string;signature:string;txRef?:string};
+export type VersionedEvent<T>={eventId:string;resourceId:string;version:number;userId?:string;data:T};

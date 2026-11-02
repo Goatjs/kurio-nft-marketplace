@@ -1,0 +1,49 @@
+{
+  "ci": {
+    "collect": {
+      "url": [
+        "http://127.0.0.1:4175/",
+        "http://127.0.0.1:4175/nfts/nft-1"
+      ],
+      "numberOfRuns": 3,
+      "startServerCommand": "npm run preview -- --host 127.0.0.1 --port 4175 --strictPort",
+      "startServerReadyPattern": "Local:",
+      "startServerReadyTimeout": 30000,
+      "settings": {
+        "maxWaitForLoad": 90000
+      }
+    },
+    "assert": {
+      "assertions": {
+        "categories:performance": [
+          "warn",
+          {
+            "minScore": 0.9
+          }
+        ],
+        "categories:accessibility": [
+          "warn",
+          {
+            "minScore": 0.95
+          }
+        ],
+        "categories:best-practices": [
+          "warn",
+          {
+            "minScore": 0.95
+          }
+        ],
+        "categories:seo": [
+          "warn",
+          {
+            "minScore": 0.9
+          }
+        ]
+      }
+    },
+    "upload": {
+      "target": "filesystem",
+      "outputDir": "./lighthouse-reports/mobile"
+    }
+  }
+}

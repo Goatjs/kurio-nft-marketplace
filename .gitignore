@@ -1,0 +1,16 @@
+node_modules/
+dist/
+.env
+playwright-report/
+test-results/
+lighthouse-reports/
+.lighthouseci/
+
+# Configurações locais e credenciais
+.env.*
+!.env.example
+
+# Artefatos locais
+.vercel/
+coverage/
+lighthouse-reports-backup-*/
