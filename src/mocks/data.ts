@@ -1,4 +1,5 @@
-import type {Cart, Nft,Order,Quote,User,Wallet} from '../contracts';
+import type {Cart, EditionOffer, Nft,Order,Quote,User,Wallet} from '../contracts';
+import {fromWei,toWei} from '../lib/money';
 export type UserRecord=User&{passwordHash:string};
 export type DB={users:UserRecord[];sessions:Record<string,{userId:string;expiresAt:number}>;nfts:Nft[];guestCart:Cart;carts:Record<string,Cart>;favorites:Record<string,string[]>;wallets:Record<string,Wallet[]>;orders:Record<string,Order>;idempotency:Record<string,{signature:string;orderId:string}>;quotes:Record<string,Quote>};
 export const emptyCart=():Cart=>({items:[],coupon:null});
@@ -14,17 +15,31 @@ const featured: Array<[string,string,string,string,string]> = [
  ['Golden Frequency #071','0.59','golden','Música','Arte e som em sintonia para colecionadores.']
 ];
 const categories=['Arte digital','Fotografia','Música','Arte 3D','Colecionáveis','Generativa','Jogos','Assinaturas','Utilidade'];
+export function buildEditionOffers(priceEth:string,stock:number):EditionOffer[]{
+ const value=toWei(priceEth);
+ return [
+  {id:'1/1',priceEth:fromWei(value*300n/100n),stock:1,maxSupply:1},
+  {id:'1/10',priceEth:fromWei(value*175n/100n),stock:10,maxSupply:10},
+  {id:'1/50',priceEth,stock,maxSupply:50},
+  {id:'ABERTA',priceEth:fromWei(value*80n/100n),stock:200,maxSupply:null}
+ ];
+}
 const seededNfts:Nft[]=Array.from({length:36},(_,i)=>{
  const [title,price,image,category,description]=featured[i%featured.length];
  const extra=i>=featured.length;
- return {id:`nft-${i+1}`,title:extra?`${title.split(' #')[0]} #${String(400+i).padStart(3,'0')}`:title,creator:'Kurio Editions',category:extra?categories[i%categories.length]:category,network:i%7===5?'Polygon':i%7===6?'Solana':'Ethereum',edition:i===2?'Rare':i%4===0?'Legendary':'Standard',priceEth:extra?(Number(price)+(i%5)*0.07).toFixed(2):price,stock:i===0?50:i===2?7:Math.max(3,50-i%36),image:`/assets/${image}.webp`,description,version:1};
+ return {id:`nft-${i+1}`,title:extra?`${title.split(' #')[0]} #${String(400+i).padStart(3,'0')}`:title,creator:'Kurio Editions',category:extra?categories[i%categories.length]:category,network:i%7===5?'Polygon':i%7===6?'Solana':'Ethereum',edition:i===2?'Rare':i%4===0?'Legendary':'Standard',priceEth:extra?(Number(price)+(i%5)*0.07).toFixed(2):price,stock:i===0?50:i===2?7:Math.max(3,50-i%36),image:`/assets/${image}.webp`,description,version:1,editions:buildEditionOffers(extra?(Number(price)+(i%5)*0.07).toFixed(2):price,i===0?50:i===2?7:Math.max(3,50-i%36))};
 });
 const hashSeed1='63abea7904dd34045d7d2312aa6f32809bc3d2f33fb4f6ba3edabe1377e1bd7d';
 const hashSeed2='f77894c5ac403c5f453d544a61b73dad3e8492e59638767b253a45849980a862';
 export function seed():DB{return {users:[{id:'user-1',name:'Alex Collector',email:'alex@example.test',avatar:'',passwordHash:hashSeed1},{id:'user-2',name:'Sam Collector',email:'sam@example.test',avatar:'',passwordHash:hashSeed2}],sessions:{},nfts:seededNfts,guestCart:emptyCart(),carts:{},favorites:{},wallets:{'user-1':[{id:'wallet-1',label:'Principal',network:'Ethereum',address:'0x1111111111111111111111111111111111111111',primary:true}]},orders:{},idempotency:{},quotes:{}};}
 const DB_KEY='kurio-marketplace-demo-v2';
 let db:DB;
-export function getDB(){if(!db){try{db=JSON.parse(localStorage.getItem(DB_KEY)||'null')||seed();}catch{db=seed();}}return db;}
+export function getDB(){if(!db){try{db=JSON.parse(localStorage.getItem(DB_KEY)||'null')||seed();}catch{db=seed();}
+ // Migração de cestas salvas antes do Passo 2B: edição padrão = 1/50.
+ for(const nft of db.nfts){if(!Array.isArray(nft.editions))nft.editions=buildEditionOffers(nft.priceEth,nft.stock);}
+ for(const cart of [db.guestCart,...Object.values(db.carts)])for(const item of cart.items){if(!item.editionId)item.editionId='1/50';}
+ localStorage.setItem(DB_KEY,JSON.stringify(db));
+ }return db;}
 export function persist(){localStorage.setItem(DB_KEY,JSON.stringify(getDB()));}
 export function reset(){db=seed();persist();localStorage.removeItem('nft-token');}
 export function userSafe(record:UserRecord):User {const {id,email,name,avatar}=record;return {id,email,name,avatar,username:record.username,ens:record.ens,walletAlias:record.walletAlias};}

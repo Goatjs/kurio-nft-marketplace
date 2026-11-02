@@ -1,5 +1,5 @@
 import {delay,http,HttpResponse} from 'msw';
-import type {Cart,Order,Quote,User,Wallet} from '../contracts';
+import type {Cart,EditionId,Order,Quote,User,Wallet} from '../contracts';
 import {emptyCart,getDB,hashPassword,persist,reset,userSafe} from './data';
 import {fromWei,toWei} from '../lib/money';
 import {publishNft,publishOrder,socketHandler} from './socket';
@@ -15,13 +15,18 @@ function cartFor(req:Request):Cart{
  const user=auth(req);return user?(db().carts[user.id]??=emptyCart()):db().guestCart;
 }
 function findNft(id:string){return db().nfts.find(n=>n.id===id);}
+const defaultEdition:EditionId='1/50';
+function findEdition(nftId:string,editionId:EditionId){return findNft(nftId)?.editions.find(e=>e.id===editionId);}
+
 function quoteFor(cart:Cart):Quote|ReturnType<typeof fail>{
  const items:Quote['items']=[];let subtotal=0n;
  for(const item of cart.items){const nft=findNft(item.nftId);
   if(!nft)return fail(404,'NFT não encontrado');
-  if(!Number.isInteger(item.quantity)||item.quantity<1||item.quantity>nft.stock)return fail(409,`Estoque alterado: ${nft.title}`);
-  const line=toWei(nft.priceEth)*BigInt(item.quantity);subtotal+=line;
-  items.push({...item,unitPriceEth:nft.priceEth,lineEth:fromWei(line),version:nft.version,title:nft.title,image:nft.image});
+  const offer=findEdition(item.nftId,item.editionId??defaultEdition);
+  if(!offer)return fail(422,'Edição inválida');
+  if(!Number.isInteger(item.quantity)||item.quantity<1||item.quantity>offer.stock)return fail(409,`Estoque alterado: ${nft.title} (${offer.id})`);
+  const line=toWei(offer.priceEth)*BigInt(item.quantity);subtotal+=line;
+  items.push({...item,editionId:offer.id,unitPriceEth:offer.priceEth,lineEth:fromWei(line),version:nft.version,title:nft.title,image:nft.image});
  }
  if(cart.coupon && cart.coupon!=='SAVE10')return fail(422,'Cupom inválido ou expirado');
  const discount=cart.coupon==='SAVE10'?subtotal/10n:0n;
@@ -32,7 +37,7 @@ function quoteFor(cart:Cart):Quote|ReturnType<typeof fail>{
 }
 function errorForQuote(q:Quote):string|null{
  if(Date.now()>q.expiresAt)return 'Cotação expirada';
- const current=quoteFor({items:q.items.map(({nftId,quantity})=>({nftId,quantity})),coupon:q.coupon});
+ const current=quoteFor({items:q.items.map(({nftId,editionId,quantity})=>({nftId,editionId:editionId??defaultEdition,quantity})),coupon:q.coupon});
  if(current instanceof HttpResponse)return 'Item esgotado ou indisponível';
  return q.signature===current.signature?null:'Preço ou disponibilidade alterados';
 }
@@ -43,9 +48,9 @@ function reconcile(order:Order){
   if(order.status==='confirmed'){
    order.txRef=`0x${order.id.replace(/-/g,'').padEnd(64,'0').slice(0,64)}`;
    const cart=db().carts[order.userId]??emptyCart();
-   for(const paid of order.quote.items){const item=cart.items.find(i=>i.nftId===paid.nftId);if(item){item.quantity-=paid.quantity;}}
+   for(const paid of order.quote.items){const item=cart.items.find(i=>i.nftId===paid.nftId&&(i.editionId??defaultEdition)===(paid.editionId??defaultEdition));if(item)item.quantity-=paid.quantity;}
    cart.items=cart.items.filter(i=>i.quantity>0);
-   for(const paid of order.quote.items){const nft=findNft(paid.nftId);if(nft){nft.stock=Math.max(0,nft.stock-paid.quantity);nft.version++;publishNft(nft);}}
+   for(const paid of order.quote.items){const nft=findNft(paid.nftId);const offer=findEdition(paid.nftId,paid.editionId??defaultEdition);if(nft&&offer){offer.stock=Math.max(0,offer.stock-paid.quantity);nft.stock=nft.editions.find(e=>e.id===defaultEdition)?.stock??nft.stock;nft.version++;publishNft(nft);}}
   }
   persist();publishOrder(order);
  }
@@ -57,7 +62,7 @@ export const handlers=[
  http.post('/api/login',async({request})=>{await network();const body=await request.json() as {email:string;password:string};const record=db().users.find(u=>u.email.toLowerCase()===body.email?.toLowerCase());
   if(!record || record.passwordHash!==await hashPassword(body.password??''))return fail(401,'Credenciais incorretas');
   const token=crypto.randomUUID();db().sessions[token]={userId:record.id,expiresAt:Date.now()+1000*60*30};
-  const target=db().carts[record.id]??=emptyCart();for(const item of db().guestCart.items){const nft=findNft(item.nftId);const existing=target.items.find(i=>i.nftId===item.nftId);if(existing)existing.quantity=Math.min(nft?.stock??0,existing.quantity+item.quantity);else target.items.push({...item,quantity:Math.min(item.quantity,nft?.stock??0)});}target.items=target.items.filter(i=>i.quantity>0);db().guestCart=emptyCart();persist();return HttpResponse.json({token,user:userSafe(record)});
+  const target=db().carts[record.id]??=emptyCart();for(const item of db().guestCart.items){const editionId=item.editionId??defaultEdition;const offer=findEdition(item.nftId,editionId);const existing=target.items.find(i=>i.nftId===item.nftId&&(i.editionId??defaultEdition)===editionId);if(existing)existing.quantity=Math.min(offer?.stock??0,existing.quantity+item.quantity);else target.items.push({...item,editionId,quantity:Math.min(item.quantity,offer?.stock??0)});}target.items=target.items.filter(i=>i.quantity>0);db().guestCart=emptyCart();persist();return HttpResponse.json({token,user:userSafe(record)});
  }),
  http.post('/api/register',async({request})=>{const body=await request.json() as {email:string;name:string;password:string};if(!body.email?.includes('@')||!body.name?.trim()||body.password?.length<8)return fail(422,'Dados de cadastro inválidos');if(db().users.some(u=>u.email.toLowerCase()===body.email.toLowerCase()))return fail(409,'E-mail já cadastrado');const user={id:crypto.randomUUID(),name:body.name,email:body.email,avatar:'',passwordHash:await hashPassword(body.password)};db().users.push(user);const token=crypto.randomUUID();db().sessions[token]={userId:user.id,expiresAt:Date.now()+1000*60*30};db().carts[user.id]=db().guestCart;db().guestCart=emptyCart();persist();return HttpResponse.json({user:userSafe(user),token},{status:201});}),
  http.post('/api/logout',({request})=>{const token=request.headers.get('Authorization')?.replace(/^Bearer /,'');if(token)delete db().sessions[token];persist();return HttpResponse.json({ok:true});}),
@@ -67,9 +72,9 @@ export const handlers=[
  http.post('/api/favorites/:id',({request,params})=>{const user=auth(request);if(!user)return fail(401,'Faça login');const id=String(params.id);if(!findNft(id))return fail(404,'NFT não encontrado');const favs=db().favorites[user.id]??=[];if(!favs.includes(id))favs.push(id);persist();return HttpResponse.json(favs);}),
  http.delete('/api/favorites/:id',({request,params})=>{const user=auth(request);if(!user)return fail(401,'Faça login');db().favorites[user.id]=(db().favorites[user.id]??[]).filter(id=>id!==params.id);persist();return HttpResponse.json(db().favorites[user.id]);}),
  http.get('/api/cart',({request})=>HttpResponse.json(cartFor(request))),
- http.post('/api/cart/items',async({request})=>{const {nftId,quantity}=await request.json() as {nftId:string;quantity:number};const nft=findNft(nftId);if(!nft)return fail(404,'NFT não encontrado');if(!Number.isInteger(quantity)||quantity<1)return fail(422,'Quantidade inválida');const cart=cartFor(request);const item=cart.items.find(i=>i.nftId===nftId);if((item?.quantity??0)+quantity>nft.stock)return fail(409,'Quantidade indisponível');if(item)item.quantity+=quantity;else cart.items.push({nftId,quantity});persist();return HttpResponse.json(cart);}),
- http.patch('/api/cart/items/:id',async({request,params})=>{const cart=cartFor(request);const item=cart.items.find(i=>i.nftId===params.id);if(!item)return fail(404,'Item não encontrado');const {quantity}=await request.json() as {quantity:number};if(!Number.isInteger(quantity)||quantity<1)return fail(422,'Quantidade inválida');if(quantity>(findNft(item.nftId)?.stock??0))return fail(409,'Estoque insuficiente');item.quantity=quantity;persist();return HttpResponse.json(cart);}),
- http.delete('/api/cart/items/:id',({request,params})=>{const cart=cartFor(request);cart.items=cart.items.filter(i=>i.nftId!==params.id);persist();return HttpResponse.json(cart);}),
+ http.post('/api/cart/items',async({request})=>{const {nftId,quantity,editionId=defaultEdition}=await request.json() as {nftId:string;quantity:number;editionId?:EditionId};const nft=findNft(nftId);if(!nft)return fail(404,'NFT não encontrado');const offer=findEdition(nftId,editionId);if(!offer)return fail(422,'Edição inválida');if(!Number.isInteger(quantity)||quantity<1)return fail(422,'Quantidade inválida');const cart=cartFor(request);const item=cart.items.find(i=>i.nftId===nftId&&(i.editionId??defaultEdition)===editionId);if((item?.quantity??0)+quantity>offer.stock)return fail(409,'Quantidade indisponível');if(item)item.quantity+=quantity;else cart.items.push({nftId,editionId,quantity});persist();return HttpResponse.json(cart);}),
+ http.patch('/api/cart/items/:id',async({request,params})=>{const {quantity,editionId=defaultEdition}=await request.json() as {quantity:number;editionId?:EditionId};const cart=cartFor(request);const item=cart.items.find(i=>i.nftId===params.id&&(i.editionId??defaultEdition)===editionId);if(!item)return fail(404,'Item não encontrado');if(!Number.isInteger(quantity)||quantity<1)return fail(422,'Quantidade inválida');if(quantity>(findEdition(item.nftId,editionId)?.stock??0))return fail(409,'Estoque insuficiente');item.quantity=quantity;persist();return HttpResponse.json(cart);}),
+ http.delete('/api/cart/items/:id',({request,params})=>{const editionId=new URL(request.url).searchParams.get('editionId')??defaultEdition;const cart=cartFor(request);cart.items=cart.items.filter(i=>!(i.nftId===params.id&&(i.editionId??defaultEdition)===editionId));persist();return HttpResponse.json(cart);}),
  http.put('/api/cart/coupon',async({request})=>{const {coupon}=await request.json() as {coupon:string|null};if(coupon&&coupon!=='SAVE10')return fail(422,'Cupom inválido ou expirado');const cart=cartFor(request);cart.coupon=coupon;persist();return HttpResponse.json(cart);}),
  http.post('/api/quote',({request})=>{const q=quoteFor(cartFor(request));return q instanceof HttpResponse?q:HttpResponse.json(q);}),
  http.get('/api/wallets',({request})=>{const user=auth(request);return user?HttpResponse.json(db().wallets[user.id]||[]):fail(401,'Faça login');}),
@@ -84,6 +89,6 @@ export const handlers=[
  }),
  http.get('/api/orders/by-key/:key',({request,params})=>{const user=auth(request);if(!user)return fail(401,'Faça login');const recorded=db().idempotency[`${user.id}:${params.key}`];if(!recorded)return fail(404,'Tentativa não encontrada');return HttpResponse.json(reconcile(db().orders[recorded.orderId]));}),
  http.get('/api/orders/:id',({request,params})=>{const user=auth(request);if(!user)return fail(401,'Faça login');const order=db().orders[String(params.id)];return order&&order.userId===user.id?HttpResponse.json(reconcile(order)):fail(404,'Pedido inexistente');}),
- http.post('/api/demo/price/:id',({params})=>{const item=findNft(String(params.id));if(!item)return fail(404,'NFT não encontrado');item.priceEth=fromWei(toWei(item.priceEth)+toWei('0.01'));item.version++;persist();publishNft(item);return HttpResponse.json(item);}),
+ http.post('/api/demo/price/:id',({params})=>{const item=findNft(String(params.id));if(!item)return fail(404,'NFT não encontrado');item.priceEth=fromWei(toWei(item.priceEth)+toWei('0.01'));const standard=item.editions.find(e=>e.id===defaultEdition);if(standard)standard.priceEth=item.priceEth;item.version++;persist();publishNft(item);return HttpResponse.json(item);}),
  http.post('/api/demo/reset',()=>{reset();return HttpResponse.json({ok:true});})
 ];

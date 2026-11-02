@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type {Cart, CatalogFilters,CatalogResult,Nft,Order,Quote,User,Wallet} from './contracts';
+import type {Cart, CatalogFilters,CatalogResult,EditionId,Nft,Order,Quote,User,Wallet} from './contracts';
 export const httpClient=axios.create({baseURL:'/api',timeout:8000});
 httpClient.interceptors.request.use(config=>{const token=localStorage.getItem('nft-token');if(token)config.headers.Authorization=`Bearer ${token}`;return config;});
 const data=<T,>(p:Promise<{data:T}>):Promise<T>=>p.then(r=>r.data);
@@ -13,9 +13,9 @@ export const api={
  favorites:()=>data(httpClient.get<string[]>('/favorites')),
  favorite:(id:string,active:boolean)=>data(active?httpClient.post(`/favorites/${id}`):httpClient.delete(`/favorites/${id}`)),
  cart:()=>data(httpClient.get<Cart>('/cart')),
- add:(nftId:string,quantity=1)=>data(httpClient.post<Cart>('/cart/items',{nftId,quantity})),
- setQuantity:(nftId:string,quantity:number)=>data(httpClient.patch<Cart>(`/cart/items/${nftId}`,{quantity})),
- remove:(nftId:string)=>data(httpClient.delete<Cart>(`/cart/items/${nftId}`)),
+ add:(nftId:string,quantity=1,editionId:EditionId='1/50')=>data(httpClient.post<Cart>('/cart/items',{nftId,quantity,editionId})),
+ setQuantity:(nftId:string,quantity:number,editionId:EditionId='1/50')=>data(httpClient.patch<Cart>(`/cart/items/${nftId}`,{quantity,editionId})),
+ remove:(nftId:string,editionId:EditionId='1/50')=>data(httpClient.delete<Cart>(`/cart/items/${nftId}`,{params:{editionId}})),
  coupon:(coupon:string|null)=>data(httpClient.put<Cart>('/cart/coupon',{coupon})),
  quote:()=>data(httpClient.post<Quote>('/quote')),
  placeOrder:(quoteId:string,walletId:string,key:string)=>data(httpClient.post<Order>('/orders',{quoteId,walletId},{headers:{'Idempotency-Key':key}})),

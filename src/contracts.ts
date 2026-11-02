@@ -1,9 +1,12 @@
 export type Edition = 'Standard'|'Rare'|'Legendary';
+export type EditionId = '1/1'|'1/10'|'1/50'|'ABERTA';
+export const EDITION_IDS:EditionId[]=['1/1','1/10','1/50','ABERTA'];
+export type EditionOffer={id:EditionId;priceEth:string;stock:number;maxSupply:number|null};
 export type Sort = 'popular'|'price_asc'|'price_desc'|'newest';
-export type Nft = {id:string;title:string;creator:string;category:string;network:'Ethereum'|'Polygon'|'Solana';edition:Edition;priceEth:string;stock:number;image:string;description:string;version:number};
+export type Nft = {id:string;title:string;creator:string;category:string;network:'Ethereum'|'Polygon'|'Solana';edition:Edition;priceEth:string;stock:number;editions:EditionOffer[];image:string;description:string;version:number};
 export type CatalogFilters={q:string;category:string;sort:Sort;page:number;maxPrice?:string;network?:string};
 export type CatalogResult={items:Nft[];total:number;page:number;pageSize:number};
-export type CartItem={nftId:string;quantity:number};
+export type CartItem={nftId:string;editionId:EditionId;quantity:number};
 export type Cart={items:CartItem[];coupon:string|null};
 export type Quote={id:string;items:Array<CartItem&{unitPriceEth:string;lineEth:string;version:number;title:string;image:string}>;subtotalEth:string;discountEth:string;networkFeeEth:string;totalEth:string;coupon:string|null;expiresAt:number;signature:string};
 export type User={id:string;email:string;name:string;avatar:string;username?:string;ens?:string;walletAlias?:string};
