@@ -36,6 +36,40 @@ export function publishNft(nft: Nft) {
   for (const client of clients) client.emit('nft.updated', payload);
 }
 
+/** Deterministic realtime scenarios exposed only by demo REST routes.
+ * Events pass through the actual MSW Socket.IO transport. The fixture never
+ * writes to the database or invokes a React state setter.
+ */
+export function connectedRealtimeClients() {
+  return clients.size;
+}
+
+export function publishNftScenario(nft: Nft, scenario: 'duplicate' | 'out-of-order') {
+  const current: VersionedEvent<Nft> = {
+    eventId: crypto.randomUUID(),
+    resourceId: nft.id,
+    version: nft.version,
+    data: structuredClone(nft),
+  };
+  const staleVersion = Math.max(0, nft.version - 1);
+  const stale: VersionedEvent<Nft> = {
+    eventId: crypto.randomUUID(),
+    resourceId: nft.id,
+    version: staleVersion,
+    data: {
+      ...structuredClone(nft),
+      priceEth: '0.01',
+      version: staleVersion,
+      editions: nft.editions.map(offer => ({ ...offer, priceEth: '0.01' })),
+    },
+  };
+  const messages = scenario === 'duplicate' ? [current, current] : [current, stale];
+  for (const client of clients) {
+    for (const message of messages) client.emit('nft.updated', message);
+  }
+  return { scenario, clients: clients.size, versions: messages.map(message => message.version) };
+}
+
 export function publishOrder(order: Order) {
   const payload: VersionedEvent<Order> = {
     eventId: crypto.randomUUID(),

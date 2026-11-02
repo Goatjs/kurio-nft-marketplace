@@ -2,7 +2,7 @@ import {delay,http,HttpResponse} from 'msw';
 import type {Cart,EditionId,Order,Quote,User,Wallet} from '../contracts';
 import {emptyCart,getDB,hashPassword,persist,reset,userSafe} from './data';
 import {fromWei,toWei} from '../lib/money';
-import {publishNft,publishOrder,socketHandler} from './socket';
+import {connectedRealtimeClients,publishNft,publishNftScenario,publishOrder,socketHandler} from './socket';
 const fail=(status:number,message:string)=>HttpResponse.json({message},{status});
 const db=getDB;
 function auth(req:Request):User|null{
@@ -97,6 +97,15 @@ export const handlers=[
   db().sessions[token].expiresAt=Date.now()-1000;
   persist();
   return HttpResponse.json({ok:true});
+ }),
+ // Development-only fixture endpoints. These never mutate prices, stock, or cart.
+ http.get('/api/demo/socket/status',()=>HttpResponse.json({clients:connectedRealtimeClients()})),
+ http.post('/api/demo/socket/nft/:id',async({params,request})=>{
+  const nft=findNft(String(params.id));
+  if(!nft)return fail(404,'NFT não encontrado');
+  const body=await request.json() as {scenario?:string};
+  if(body.scenario!=='duplicate'&&body.scenario!=='out-of-order')return fail(422,'Cenário Socket.IO inválido');
+  return HttpResponse.json(publishNftScenario(nft,body.scenario));
  }),
  http.post('/api/demo/reset',()=>{reset();return HttpResponse.json({ok:true});})
 ];
