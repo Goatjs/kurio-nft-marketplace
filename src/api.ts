@@ -1,93 +1,56 @@
 import type {
   Cart,CatalogFilters,CatalogResult,EditionId,Nft,Order,Quote,User,Wallet
 } from './contracts';
+import axios, {
+  type AxiosRequestConfig,
+  type AxiosResponse
+} from 'axios';
 
-type RequestOptions = {
-  params?: object;
-  signal?: AbortSignal;
-  headers?: Record<string,string>;
-};
+type RequestOptions = Pick<
+  AxiosRequestConfig,
+  'params' | 'signal' | 'headers'
+>;
 
-type HttpResult<T> = {data:T};
+const client = axios.create({
+  baseURL: '/api',
+  timeout: 8000
+});
 
-type HttpError = Error & {
-  response?: {status:number;data:unknown};
-};
+client.interceptors.request.use(config => {
+  const token = localStorage.getItem('nft-token');
 
-async function request<T>(
-  method:string,
-  path:string,
-  body?:unknown,
-  options:RequestOptions={}
-):Promise<HttpResult<T>> {
-  const params = new URLSearchParams();
-
-  for (const [key,value] of Object.entries(options.params??{})) {
-    if (value !== null && value !== undefined) {
-      params.append(key,String(value));
-    }
+  if (token) {
+    config.headers.set('Authorization', 'Bearer ' + token);
   }
 
-  const query = params.toString();
-  const url = '/api' + path + (query ? '?' + query : '');
+  return config;
+});
 
-  const controller = new AbortController();
-  const onAbort = () => controller.abort();
+client.interceptors.response.use(
+  response => response,
+  error => {
+    if (axios.isAxiosError(error) && error.response?.status === 401) {
+      const path = error.config?.url ?? '';
+      const sentAuth = error.config?.headers?.get('Authorization');
+      const currentToken = localStorage.getItem('nft-token');
 
-  if (options.signal?.aborted) controller.abort();
-  options.signal?.addEventListener('abort',onAbort,{once:true});
-
-  let timedOut = false;
-  const timeout = setTimeout(() => {
-    timedOut = true;
-    controller.abort();
-  },8000);
-
-  const token = localStorage.getItem('nft-token');
-  const sentAuth = token ? 'Bearer ' + token : null;
-  const headers:Record<string,string> = {...options.headers};
-
-  if (sentAuth) headers.Authorization = sentAuth;
-  if (body !== undefined) headers['Content-Type'] = 'application/json';
-
-  try {
-    const response = await fetch(url,{
-      method,
-      headers,
-      signal:controller.signal,
-      ...(body === undefined ? {} : {body:JSON.stringify(body)})
-    });
-
-    const raw = await response.text();
-    let payload:unknown = raw;
-
-    if (raw) {
-      try {
-        payload = JSON.parse(raw);
-      } catch {
-        payload = raw;
-      }
-    }
-
-    if (!response.ok) {
       if (
-        response.status === 401 &&
-        sentAuth &&
-        sentAuth === 'Bearer ' + localStorage.getItem('nft-token') &&
+        currentToken &&
+        sentAuth === 'Bearer ' + currentToken &&
         path !== '/login' &&
         path !== '/register'
       ) {
-        const current = window.location.pathname+window.location.search;
+        const current = window.location.pathname + window.location.search;
 
         if (
           (window.location.pathname === '/checkout' ||
            window.location.pathname.startsWith('/orders/')) &&
           !sessionStorage.getItem('kurio-return')
         ) {
-          sessionStorage.setItem('kurio-return',current);
+          sessionStorage.setItem('kurio-return', current);
         }
 
-        sessionStorage.setItem('kurio-session-expired','1');
+        sessionStorage.setItem('kurio-session-expired', '1');
         localStorage.removeItem('nft-token');
         window.dispatchEvent(new Event('kurio-session-expired'));
 
@@ -98,50 +61,31 @@ async function request<T>(
           window.location.replace(current);
         }
       }
-
-      const error = new Error(
-        'Request failed with status code ' + response.status
-      ) as HttpError;
-
-      error.response = {
-        status:response.status,
-        data:payload
-      };
-
-      throw error;
     }
 
-    return {data:payload as T};
-  } catch (error) {
-    if (timedOut) {
-      throw new Error('timeout of 8000ms exceeded');
-    }
-    throw error;
-  } finally {
-    clearTimeout(timeout);
-    options.signal?.removeEventListener('abort',onAbort);
+    return Promise.reject(error);
   }
-}
+);
 
 export const httpClient = {
-  get:<T>(path:string,options?:RequestOptions)=>
-    request<T>('GET',path,undefined,options),
+  get: <T>(path: string, options?: RequestOptions) =>
+    client.get<T>(path, options),
 
-  post:<T>(path:string,body?:unknown,options?:RequestOptions)=>
-    request<T>('POST',path,body,options),
+  post: <T>(path: string, body?: unknown, options?: RequestOptions) =>
+    client.post<T>(path, body, options),
 
-  put:<T>(path:string,body?:unknown,options?:RequestOptions)=>
-    request<T>('PUT',path,body,options),
+  put: <T>(path: string, body?: unknown, options?: RequestOptions) =>
+    client.put<T>(path, body, options),
 
-  patch:<T>(path:string,body?:unknown,options?:RequestOptions)=>
-    request<T>('PATCH',path,body,options),
+  patch: <T>(path: string, body?: unknown, options?: RequestOptions) =>
+    client.patch<T>(path, body, options),
 
-  delete:<T>(path:string,options?:RequestOptions)=>
-    request<T>('DELETE',path,undefined,options)
+  delete: <T>(path: string, options?: RequestOptions) =>
+    client.delete<T>(path, options)
 };
 
-const data = <T,>(p:Promise<HttpResult<T>>):Promise<T> =>
-  p.then(result=>result.data);
+const data = <T,>(p: Promise<AxiosResponse<T>>): Promise<T> =>
+  p.then(result => result.data);
 
 export const api={
  session:()=>data(httpClient.get<User>('/session')),

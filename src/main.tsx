@@ -1,3 +1,4 @@
+import {DetailSkeleton} from './detail-skeleton';
 import React from 'react';
 import {createRoot} from 'react-dom/client';
 import {QueryClient,QueryClientProvider} from '@tanstack/react-query';
@@ -27,7 +28,7 @@ const Detail = React.lazy(() =>
 
 function DetailRoute(){
   return <React.Suspense
-    fallback={<div role="status" className="panel">Carregando...</div>}
+    fallback={<DetailSkeleton/>}
   >
     <Detail/>
   </React.Suspense>;
