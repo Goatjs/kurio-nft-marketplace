@@ -2,8 +2,13 @@ import React from 'react';
 import {createRoot} from 'react-dom/client';
 import {QueryClient,QueryClientProvider} from '@tanstack/react-query';
 import {createRootRoute,createRoute,createRouter,RouterProvider} from '@tanstack/react-router';
-import {CartPage,CheckoutPage,Detail,Home,Market,Layout,LoginPage,NotFound,OrderPage,ProfilePage,RegisterPage,WalletsPage} from './pages';
+import {CartPage,CheckoutPage,Detail,Home,Market,Layout,NotFound,OrderPage,ProfilePage,WalletsPage} from './pages';
 import './styles.css';
+const LoginPage = React.lazy(() => import('./auth-pages').then(m => ({default: m.LoginPage})));
+const RegisterPage = React.lazy(() => import('./auth-pages').then(m => ({default: m.RegisterPage})));
+function LoginRoute(){return <React.Suspense fallback={<div role="status" className="panel">Carregando...</div>}><LoginPage/></React.Suspense>}
+function RegisterRoute(){return <React.Suspense fallback={<div role="status" className="panel">Carregando...</div>}><RegisterPage/></React.Suspense>}
+
 const root=createRootRoute({component:Layout,notFoundComponent:NotFound});
 const index=createRoute({getParentRoute:()=>root,path:'/',component:Home,validateSearch:(s:Record<string,unknown>)=>({q:typeof s.q==='string'?s.q:'',category:typeof s.category==='string'?s.category:'all',sort:s.sort==='price_asc'||s.sort==='price_desc'||s.sort==='newest'?s.sort:'popular',page:Math.max(1,Number(s.page)||1),maxPrice:typeof s.maxPrice==='string'?s.maxPrice:'',network:typeof s.network==='string'?s.network:'all'})});
 const market=createRoute({getParentRoute:()=>root,path:'/market',component:Market,validateSearch:(s:Record<string,unknown>)=>({q:typeof s.q==='string'?s.q:'',category:typeof s.category==='string'?s.category:'all',sort:s.sort==='price_asc'||s.sort==='price_desc'||s.sort==='newest'?s.sort:'popular',page:Math.max(1,Number(s.page)||1),maxPrice:typeof s.maxPrice==='string'?s.maxPrice:'',network:typeof s.network==='string'?s.network:'all'})});
@@ -11,8 +16,8 @@ const detail=createRoute({getParentRoute:()=>root,path:'/nfts/$nftId',component:
 const cart=createRoute({getParentRoute:()=>root,path:'/cart',component:CartPage});
 const checkout=createRoute({getParentRoute:()=>root,path:'/checkout',component:CheckoutPage});
 const order=createRoute({getParentRoute:()=>root,path:'/orders/$orderId',component:OrderPage});
-const login=createRoute({getParentRoute:()=>root,path:'/login',component:LoginPage});
-const register=createRoute({getParentRoute:()=>root,path:'/register',component:RegisterPage});
+const login=createRoute({getParentRoute:()=>root,path:'/login',component:LoginRoute});
+const register=createRoute({getParentRoute:()=>root,path:'/register',component:RegisterRoute});
 const profile=createRoute({getParentRoute:()=>root,path:'/profile',component:ProfilePage});
 const wallets=createRoute({getParentRoute:()=>root,path:'/wallets',component:WalletsPage});
 const routeTree=root.addChildren([index,market,detail,cart,checkout,order,login,register,profile,wallets]);
