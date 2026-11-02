@@ -16,14 +16,47 @@ socketUrl.protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
 const channel = ws.link(socketUrl.toString());
 type MockSocketClient = ReturnType<typeof toSocketIo>['client'];
 const clients = new Set<MockSocketClient>();
+// Raw mocked WebSockets are retained only to simulate a server-side outage.
+const transports = new Map<MockSocketClient, {close: (code?: number, reason?: string) => void}>();
+let paused = false;
 
 export const socketHandler = channel.addEventListener('connection', (connection) => {
+  if (paused) {
+    // Force a genuine WebSocket transport failure before the Socket.IO handshake.
+    connection.client.close(1011, 'Kurio demo: servidor indisponível');
+    return;
+  }
   // This adapter performs the Socket.IO handshake and framing.
   const socket = toSocketIo(connection);
   clients.add(socket.client);
+  transports.set(socket.client, connection.client);
   if (import.meta.env.DEV) console.info('[Kurio MSW Socket] conexão interceptada. Clientes:', clients.size);
-  connection.client.addEventListener('close', () => clients.delete(socket.client));
+  connection.client.addEventListener('close', () => {
+    clients.delete(socket.client);
+    transports.delete(socket.client);
+  });
 });
+
+/** REST-controlled transport outage. Does not mutate React state or NFT data. */
+export function disconnectRealtimeClients() {
+  paused = true;
+  const closed = transports.size;
+  for (const [socket, transport] of transports) {
+    transport.close(1011, 'Kurio demo: conexão interrompida');
+    clients.delete(socket);
+  }
+  transports.clear();
+  return {paused, closed, clients: clients.size};
+}
+
+export function resumeRealtimeClients() {
+  paused = false;
+  return {paused, clients: clients.size};
+}
+
+export function realtimeStatus() {
+  return {paused, clients: clients.size};
+}
 
 export function publishNft(nft: Nft) {
   const payload: VersionedEvent<Nft> = {

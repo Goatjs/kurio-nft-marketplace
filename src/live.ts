@@ -27,7 +27,10 @@ export function subscribeLive(qc: QueryClient, userId: string | null) {
       transports: ['websocket'],
       autoConnect: false,
       reconnection: true,
-      reconnectionAttempts: 5,
+      reconnectionAttempts: 20,
+      reconnectionDelay: 250,
+      reconnectionDelayMax: 1000,
+      randomizationFactor: 0,
       timeout: 5000,
     });
 

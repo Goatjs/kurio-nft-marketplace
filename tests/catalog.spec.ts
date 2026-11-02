@@ -134,6 +134,20 @@ test('visual: captura de referência local sem baseline nesta etapa',async({page
 test('altera o preço do NFT via mock REST e evento Socket.IO',async({page})=>{
  await openPage(page,'/nfts/nft-1');
  await expect(page.locator('.detail-price')).toContainText('1.19 ETH');
+ // Aguarda uma conexão Socket.IO antes de disparar o evento.
+await expect.poll(async () => page.evaluate(async () => {
+  const response = await fetch('/api/demo/socket/status', {
+    cache: 'no-store'
+  });
+  if (!response.ok) return 0;
+  const data = await response.json() as { clients: number };
+  return data.clients;
+}), 
+{
+  timeout: 12000,
+  intervals: [200, 500, 800]
+}).toBeGreaterThan(0);
+ 
  // Primeiro verifica que a mutação REST funcionou; a atualização na tela
  // ainda DEVE chegar pelo cliente Socket.IO (nenhum setter direto no teste).
  const mutation = await page.evaluate(async()=>{

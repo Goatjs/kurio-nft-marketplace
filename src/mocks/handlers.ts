@@ -2,7 +2,7 @@ import {delay,http,HttpResponse} from 'msw';
 import type {Cart,EditionId,Order,Quote,User,Wallet} from '../contracts';
 import {emptyCart,getDB,hashPassword,persist,reset,userSafe} from './data';
 import {fromWei,toWei} from '../lib/money';
-import {connectedRealtimeClients,publishNft,publishNftScenario,publishOrder,socketHandler} from './socket';
+import {disconnectRealtimeClients,publishNft,publishNftScenario,publishOrder,realtimeStatus,resumeRealtimeClients,socketHandler} from './socket';
 const fail=(status:number,message:string)=>HttpResponse.json({message},{status});
 const db=getDB;
 function auth(req:Request):User|null{
@@ -99,7 +99,10 @@ export const handlers=[
   return HttpResponse.json({ok:true});
  }),
  // Development-only fixture endpoints. These never mutate prices, stock, or cart.
- http.get('/api/demo/socket/status',()=>HttpResponse.json({clients:connectedRealtimeClients()})),
+ http.get('/api/demo/socket/status',()=>HttpResponse.json(realtimeStatus())),
+ // Simulated WebSocket transport loss and recovery; the browser's real Socket.IO client reconnects.
+ http.post('/api/demo/socket/disconnect',()=>HttpResponse.json(disconnectRealtimeClients())),
+ http.post('/api/demo/socket/resume',()=>HttpResponse.json(resumeRealtimeClients())),
  http.post('/api/demo/socket/nft/:id',async({params,request})=>{
   const nft=findNft(String(params.id));
   if(!nft)return fail(404,'NFT não encontrado');
@@ -107,5 +110,14 @@ export const handlers=[
   if(body.scenario!=='duplicate'&&body.scenario!=='out-of-order')return fail(422,'Cenário Socket.IO inválido');
   return HttpResponse.json(publishNftScenario(nft,body.scenario));
  }),
- http.post('/api/demo/reset',()=>{reset();return HttpResponse.json({ok:true});})
+ // Change stock through the mocked REST API while the socket is offline.
+ http.post('/api/demo/stock/:id',async({params,request})=>{
+  const nft=findNft(String(params.id));if(!nft)return fail(404,'NFT não encontrado');
+  const body=await request.json() as {stock:number};
+  if(!Number.isInteger(body.stock)||body.stock<0||body.stock>50)return fail(422,'Estoque inválido');
+  const edition=nft.editions.find(e=>e.id==='1/50');if(!edition)return fail(422,'Edição não encontrada');
+  edition.stock=body.stock;nft.stock=body.stock;nft.version++;persist();publishNft(nft);
+  return HttpResponse.json(nft);
+ }),
+ http.post('/api/demo/reset',()=>{resumeRealtimeClients();reset();return HttpResponse.json({ok:true});})
 ];
