@@ -90,5 +90,13 @@ export const handlers=[
  http.get('/api/orders/by-key/:key',({request,params})=>{const user=auth(request);if(!user)return fail(401,'Faça login');const recorded=db().idempotency[`${user.id}:${params.key}`];if(!recorded)return fail(404,'Tentativa não encontrada');return HttpResponse.json(reconcile(db().orders[recorded.orderId]));}),
  http.get('/api/orders/:id',({request,params})=>{const user=auth(request);if(!user)return fail(401,'Faça login');const order=db().orders[String(params.id)];return order&&order.userId===user.id?HttpResponse.json(reconcile(order)):fail(404,'Pedido inexistente');}),
  http.post('/api/demo/price/:id',({params})=>{const item=findNft(String(params.id));if(!item)return fail(404,'NFT não encontrado');item.priceEth=fromWei(toWei(item.priceEth)+toWei('0.01'));const standard=item.editions.find(e=>e.id===defaultEdition);if(standard)standard.priceEth=item.priceEth;item.version++;persist();publishNft(item);return HttpResponse.json(item);}),
+ // Deterministic MSW scenario used to exercise token expiry during checkout.
+ http.post('/api/demo/expire-session',({request})=>{
+  const token=request.headers.get('Authorization')?.replace(/^Bearer /,'');
+  if(!token||!db().sessions[token])return fail(401,'Sessão inexistente');
+  db().sessions[token].expiresAt=Date.now()-1000;
+  persist();
+  return HttpResponse.json({ok:true});
+ }),
  http.post('/api/demo/reset',()=>{reset();return HttpResponse.json({ok:true});})
 ];

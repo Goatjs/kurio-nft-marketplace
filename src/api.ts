@@ -2,6 +2,29 @@ import axios from 'axios';
 import type {Cart, CatalogFilters,CatalogResult,EditionId,Nft,Order,Quote,User,Wallet} from './contracts';
 export const httpClient=axios.create({baseURL:'/api',timeout:8000});
 httpClient.interceptors.request.use(config=>{const token=localStorage.getItem('nft-token');if(token)config.headers.Authorization=`Bearer ${token}`;return config;});
+// A 401 for the active token invalidates the session immediately, even if the session query is cached.
+httpClient.interceptors.response.use(response=>response,(error:unknown)=>{
+ if(axios.isAxiosError(error)&&error.response?.status===401){
+  const path=error.config?.url??'';
+  const token=localStorage.getItem('nft-token');
+  const sentAuth=String(error.config?.headers?.Authorization??'');
+  if(token&&sentAuth===`Bearer ${token}`&&path!=='/login'&&path!=='/register'){
+   const current=window.location.pathname+window.location.search;
+   if((window.location.pathname==='/checkout'||window.location.pathname.startsWith('/orders/'))&&!sessionStorage.getItem('kurio-return')){
+    sessionStorage.setItem('kurio-return',current);
+   }
+   sessionStorage.setItem('kurio-session-expired','1');
+   localStorage.removeItem('nft-token');
+   window.dispatchEvent(new Event('kurio-session-expired'));
+   // A checkout 401 must leave the sensitive payment screen, even when
+   // React Query still holds a cached session for this render.
+   if(window.location.pathname==='/checkout'||window.location.pathname.startsWith('/orders/')){
+    window.location.replace(current);
+   }
+  }
+ }
+ return Promise.reject(error);
+});
 const data=<T,>(p:Promise<{data:T}>):Promise<T>=>p.then(r=>r.data);
 export const api={
  session:()=>data(httpClient.get<User>('/session')),
