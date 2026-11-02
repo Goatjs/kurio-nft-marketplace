@@ -1,31 +1,148 @@
-import axios from 'axios';
-import type {Cart, CatalogFilters,CatalogResult,EditionId,Nft,Order,Quote,User,Wallet} from './contracts';
-export const httpClient=axios.create({baseURL:'/api',timeout:8000});
-httpClient.interceptors.request.use(config=>{const token=localStorage.getItem('nft-token');if(token)config.headers.Authorization=`Bearer ${token}`;return config;});
-// A 401 for the active token invalidates the session immediately, even if the session query is cached.
-httpClient.interceptors.response.use(response=>response,(error:unknown)=>{
- if(axios.isAxiosError(error)&&error.response?.status===401){
-  const path=error.config?.url??'';
-  const token=localStorage.getItem('nft-token');
-  const sentAuth=String(error.config?.headers?.Authorization??'');
-  if(token&&sentAuth===`Bearer ${token}`&&path!=='/login'&&path!=='/register'){
-   const current=window.location.pathname+window.location.search;
-   if((window.location.pathname==='/checkout'||window.location.pathname.startsWith('/orders/'))&&!sessionStorage.getItem('kurio-return')){
-    sessionStorage.setItem('kurio-return',current);
-   }
-   sessionStorage.setItem('kurio-session-expired','1');
-   localStorage.removeItem('nft-token');
-   window.dispatchEvent(new Event('kurio-session-expired'));
-   // A checkout 401 must leave the sensitive payment screen, even when
-   // React Query still holds a cached session for this render.
-   if(window.location.pathname==='/checkout'||window.location.pathname.startsWith('/orders/')){
-    window.location.replace(current);
-   }
+import type {
+  Cart,CatalogFilters,CatalogResult,EditionId,Nft,Order,Quote,User,Wallet
+} from './contracts';
+
+type RequestOptions = {
+  params?: object;
+  signal?: AbortSignal;
+  headers?: Record<string,string>;
+};
+
+type HttpResult<T> = {data:T};
+
+type HttpError = Error & {
+  response?: {status:number;data:unknown};
+};
+
+async function request<T>(
+  method:string,
+  path:string,
+  body?:unknown,
+  options:RequestOptions={}
+):Promise<HttpResult<T>> {
+  const params = new URLSearchParams();
+
+  for (const [key,value] of Object.entries(options.params??{})) {
+    if (value !== null && value !== undefined) {
+      params.append(key,String(value));
+    }
   }
- }
- return Promise.reject(error);
-});
-const data=<T,>(p:Promise<{data:T}>):Promise<T>=>p.then(r=>r.data);
+
+  const query = params.toString();
+  const url = '/api' + path + (query ? '?' + query : '');
+
+  const controller = new AbortController();
+  const onAbort = () => controller.abort();
+
+  if (options.signal?.aborted) controller.abort();
+  options.signal?.addEventListener('abort',onAbort,{once:true});
+
+  let timedOut = false;
+  const timeout = setTimeout(() => {
+    timedOut = true;
+    controller.abort();
+  },8000);
+
+  const token = localStorage.getItem('nft-token');
+  const sentAuth = token ? 'Bearer ' + token : null;
+  const headers:Record<string,string> = {...options.headers};
+
+  if (sentAuth) headers.Authorization = sentAuth;
+  if (body !== undefined) headers['Content-Type'] = 'application/json';
+
+  try {
+    const response = await fetch(url,{
+      method,
+      headers,
+      signal:controller.signal,
+      ...(body === undefined ? {} : {body:JSON.stringify(body)})
+    });
+
+    const raw = await response.text();
+    let payload:unknown = raw;
+
+    if (raw) {
+      try {
+        payload = JSON.parse(raw);
+      } catch {
+        payload = raw;
+      }
+    }
+
+    if (!response.ok) {
+      if (
+        response.status === 401 &&
+        sentAuth &&
+        sentAuth === 'Bearer ' + localStorage.getItem('nft-token') &&
+        path !== '/login' &&
+        path !== '/register'
+      ) {
+        const current = window.location.pathname+window.location.search;
+
+        if (
+          (window.location.pathname === '/checkout' ||
+           window.location.pathname.startsWith('/orders/')) &&
+          !sessionStorage.getItem('kurio-return')
+        ) {
+          sessionStorage.setItem('kurio-return',current);
+        }
+
+        sessionStorage.setItem('kurio-session-expired','1');
+        localStorage.removeItem('nft-token');
+        window.dispatchEvent(new Event('kurio-session-expired'));
+
+        if (
+          window.location.pathname === '/checkout' ||
+          window.location.pathname.startsWith('/orders/')
+        ) {
+          window.location.replace(current);
+        }
+      }
+
+      const error = new Error(
+        'Request failed with status code ' + response.status
+      ) as HttpError;
+
+      error.response = {
+        status:response.status,
+        data:payload
+      };
+
+      throw error;
+    }
+
+    return {data:payload as T};
+  } catch (error) {
+    if (timedOut) {
+      throw new Error('timeout of 8000ms exceeded');
+    }
+    throw error;
+  } finally {
+    clearTimeout(timeout);
+    options.signal?.removeEventListener('abort',onAbort);
+  }
+}
+
+export const httpClient = {
+  get:<T>(path:string,options?:RequestOptions)=>
+    request<T>('GET',path,undefined,options),
+
+  post:<T>(path:string,body?:unknown,options?:RequestOptions)=>
+    request<T>('POST',path,body,options),
+
+  put:<T>(path:string,body?:unknown,options?:RequestOptions)=>
+    request<T>('PUT',path,body,options),
+
+  patch:<T>(path:string,body?:unknown,options?:RequestOptions)=>
+    request<T>('PATCH',path,body,options),
+
+  delete:<T>(path:string,options?:RequestOptions)=>
+    request<T>('DELETE',path,undefined,options)
+};
+
+const data = <T,>(p:Promise<HttpResult<T>>):Promise<T> =>
+  p.then(result=>result.data);
+
 export const api={
  session:()=>data(httpClient.get<User>('/session')),
  login:(email:string,password:string)=>data(httpClient.post<{token:string;user:User}>('/login',{email,password})),
