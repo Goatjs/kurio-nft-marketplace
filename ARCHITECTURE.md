@@ -116,3 +116,7 @@ Sem banco remoto, login real, autorização de produção, pagamentos, APIs bloc
 - CSS adicional incide apenas abaixo de 360 px, evitando alteração das baselines em 390/768/1440 px. Essa abordagem não garante ausência de regressões; os testes visuais devem ser executados.
 - `tests/phase9d-accessibility.spec.ts` adiciona verificação desktop/mobile de semântica, foco, reflow (320/390/768/1440) e redução de movimento.
 - `scripts/phase9d-visual-review.mjs` produz um comparativo local das oito referências Figma com as baselines Windows. Auditoria visual manual permanece pendente até revisão das diferenças.
+
+## Fase 9E — entrega verificável
+
+O script `scripts/phase9e-validate.mjs` executa lint, build, suítes funcional/visual e smoke de deploy (com MSW), e opcionalmente Lighthouse 3× por perfil e página. Os resultados são capturados por `scripts/phase9e-reporter.mjs` e consolidados por `scripts/phase9e-report.mjs` em `reports/phase9e/`, ignorado pelo Git. Um workflow de GitHub Actions verifica lint, build e Playwright funcional em PRs, mas **não** os snapshots Windows no Linux. Os testes não transformam o mock em backend de produção nem atestam fidelidade visual ao Figma.
