@@ -106,7 +106,77 @@ function Catalog({mode='home'}:{mode?:'home'|'market'}){const route=mode==='home
   <button type="button" className={`catalog-tab ${filters.sort==='newest'?'on':''}`} aria-pressed={filters.sort==='newest'} onClick={()=>update({sort:'newest'})}>Novos lançamentos</button>
   <button type="button" className={`catalog-tab ${filters.sort==='price_desc'?'on':''}`} aria-pressed={filters.sort==='price_desc'} onClick={()=>update({sort:'price_desc'})}>Em alta</button>
 </div><label className="sort-control">Ordenar por:<select aria-label="Ordenar NFTs" value={filters.sort} onChange={e=>update({sort:e.target.value as CatalogFilters['sort']})}><option value="popular">Listados recentemente</option><option value="newest">Novos lançamentos</option><option value="price_asc">Menor preço</option><option value="price_desc">Maior preço</option></select></label></div>
-{(mobileFilters||showSearch)&&<div className="search-inline"><input aria-label="Buscar NFT" type="search" placeholder="Buscar NFT ou criador" value={filters.q} onChange={e=>update({q:e.target.value})}/><select className="plain" aria-label="Filtrar categoria" value={filters.category} onChange={e=>category(e.target.value)}><option value="all">Todas as coleções</option>{categories.map(([name])=><option key={name}>{name}</option>)}</select><button className="icon-btn" type="button" aria-label="Fechar filtros e pesquisa" onClick={()=>{setShowSearch(false);setMobileFilters(false)}}>×</button></div>}
+{(mobileFilters || showSearch) && (
+  <div className="mobile-filter-panel" id="mobile-filter-panel">
+    <div className="search-inline">
+      <input
+        aria-label="Buscar NFT"
+        type="search"
+        placeholder="Buscar NFT ou criador"
+        value={filters.q}
+        onChange={e => update({q: e.target.value})}
+      />
+    </div>
+
+    <div className="mobile-filter-fields">
+      <label>
+        Coleção
+        <select
+          aria-label="Filtrar categoria"
+          value={filters.category}
+          onChange={e => category(e.target.value)}
+        >
+          <option value="all">Todas as coleções</option>
+          {categories.map(([name]) => (
+            <option key={name} value={name}>{name}</option>
+          ))}
+        </select>
+      </label>
+
+      <label>
+        Rede
+        <select
+          aria-label="Filtrar rede"
+          value={filters.network}
+          onChange={e => update({network: e.target.value})}
+        >
+          <option value="all">Todas as redes</option>
+          {networks.map(([name]) => (
+            <option key={name} value={name}>{name}</option>
+          ))}
+        </select>
+      </label>
+
+      <label>
+        Ordenação
+        <select
+          aria-label="Ordenar NFTs no mobile"
+          value={filters.sort}
+          onChange={e => update({
+            sort: e.target.value as CatalogFilters['sort']
+          })}
+        >
+          <option value="popular">Populares</option>
+          <option value="newest">Novos lançamentos</option>
+          <option value="price_asc">Menor preço</option>
+          <option value="price_desc">Maior preço</option>
+        </select>
+      </label>
+    </div>
+
+    <button
+      type="button"
+      className="btn small"
+      aria-label="Fechar filtros e pesquisa"
+      onClick={() => {
+        setShowSearch(false);
+        setMobileFilters(false);
+      }}
+    >
+      Fechar filtros
+    </button>
+  </div>
+)}
 <div role="status" aria-live="polite" className="small-copy muted" style={{margin:'-2px 0 12px'}}>{isFetching?'Atualizando catálogo…':data?`${data.total} NFTs encontrados`:''}</div>
 {isError?<div className="panel"><Feedback message="Não foi possível carregar o catálogo."/><Button onClick={()=>void refetch()}>Tentar novamente</Button></div>:isPending?<Loading count={8}/>:data?.items.length?<div className="grid-nfts">{data.items.map(nft=><NftCard key={nft.id} nft={nft}/>)}</div>:<p className="panel">Nenhum NFT encontrado. Ajuste os filtros ou tente outro termo.</p>}
 <nav className="page-numbers" aria-label="Paginação do catálogo"><button disabled={filters.page<=1} onClick={()=>update({page:filters.page-1})}>‹</button>{Array.from({length:Math.min(4,Math.max(1,Math.ceil((data?.total??0)/9)))},(_,i)=><button key={i} className={filters.page===i+1?'current':''} onClick={()=>update({page:i+1})}>{i+1}</button>)}<button disabled={!data||filters.page*9>=data.total} onClick={()=>update({page:filters.page+1})}>›</button></nav>
