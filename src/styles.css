@@ -163,3 +163,52 @@
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Fase 8B — filtros mobile */
+.mobile-filter-panel {
+  display: none;
+}
+
+@media (max-width: 640px) {
+  .mobile-filter-panel {
+    display: grid;
+    gap: 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 18px;
+    margin: 0 0 20px;
+  }
+
+  .mobile-filter-fields {
+    display: grid;
+    gap: 14px;
+  }
+
+  .mobile-filter-fields label {
+    display: grid;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--warm2);
+  }
+
+  .mobile-filter-fields select {
+    width: 100%;
+    min-height: 44px;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: #291c16;
+    color: #f5e5d5;
+    font: inherit;
+  }
+
+  .mobile-filter-panel .search-inline {
+    margin: 0;
+  }
+
+  .mobile-filter-panel .btn {
+    min-height: 44px;
+  }
+}
