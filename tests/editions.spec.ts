@@ -3,7 +3,7 @@ import {expect,test} from '@playwright/test';
 test.beforeEach(async({page})=>{
  await page.goto('/');
  // The app awaits worker.start() asynchronously: wait for the UI before using the API.
- await expect(page.getByRole('heading',{name:/SEJA DONO DO FUTURO/})).toBeVisible({timeout:15000});
+ await expect(page.getByRole('heading',{name:/SEJA DONO (?:DO FUTURO|DA CULTURA DIGITAL)/})).toBeVisible({timeout:15000});
  await page.evaluate(async()=>{
   localStorage.clear();
   sessionStorage.clear();
@@ -13,7 +13,7 @@ test.beforeEach(async({page})=>{
  await page.reload();
  // Recarregar a página reinicia o boot assíncrono do MSW.
  // Aguarde o React renderizar após worker.start() antes de usar fetch('/api/...').
- await expect(page.getByRole('heading',{name:/SEJA DONO DO FUTURO/})).toBeVisible({timeout:15000});
+ await expect(page.getByRole('heading',{name:/SEJA DONO (?:DO FUTURO|DA CULTURA DIGITAL)/})).toBeVisible({timeout:15000});
  await expect.poll(async()=>page.evaluate(async()=>{
   try{
    const r=await fetch('/api/nfts/nft-1',{cache:'no-store'});

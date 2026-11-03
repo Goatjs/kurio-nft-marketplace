@@ -1,0 +1,117 @@
+/* Kurio phase 9F V5 — desktop alignment: auth catalog/modal, wallets, receipt, checkout.
+   Complements V1-V4. Mobile existing layout is intentionally preserved. */
+.phase9f-auth-preview, .phase9f-auth-dialog-tools {display:none}
+.phase9f-receipt-close {display:none}
+.phase9f-wallet-readonly-help {color:var(--muted)}
+.phase9f-wallets-page .field-grid input[readonly] {color:var(--muted);background:#1b100d;cursor:default}
+.phase9f-wallet-saved {border-radius:10px}
+@media (min-width:641px) {
+  /* Recreate the Figma's darkened catalog behind an actual accessible login route. */
+  .auth-page {min-height:1120px;align-items:flex-start;padding:0 0 70px;isolation:isolate;}
+  .phase9f-auth-preview {display:block;position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden;padding-top:20px}
+  .phase9f-auth-preview-hero {display:grid;grid-template-columns:minmax(0,1fr) 40%;gap:20px;align-items:center;min-height:235px;margin-bottom:22px;padding:22px 32px;border-radius:14px;background:linear-gradient(100deg,#271811,#38241b)}
+  .phase9f-auth-preview-hero h2{font-size:34px;line-height:1.32;max-width:490px;margin:10px 0;color:#f8eae0;letter-spacing:.03em}
+  .phase9f-auth-preview-hero p{color:#cdb59e;font-size:13px;max-width:350px}
+  .phase9f-auth-preview-hero>div>span:first-child{font-size:13px;color:#e4c5ad}
+  .phase9f-auth-preview-hero img {width:100%;max-height:250px;object-fit:cover;border-radius:14px}
+  .phase9f-auth-preview-cta{display:inline-block;padding:10px 17px;background:var(--warm);color:#25120d;border-radius:6px;font-size:12px;margin-top:13px}
+  .phase9f-auth-preview-collection{display:grid;grid-template-columns:230px minmax(0,1fr);gap:24px;align-items:start}
+  .phase9f-auth-preview-collection aside{padding:20px;background:var(--surface);border-radius:9px;color:#c7a789}
+  .phase9f-auth-preview-collection aside strong{display:block;color:#f4e7de;margin:10px 0 12px}
+  .phase9f-auth-preview-collection aside p{margin:10px 0;font-size:12px}
+  .phase9f-auth-preview-filter{padding:16px 0 20px;font-size:12px;color:#f0d8c2}
+  .phase9f-auth-preview-tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:26px 19px}
+  .phase9f-auth-preview-tiles>div{min-width:0;display:flex;flex-direction:column;gap:6px;font-size:12px}
+  .phase9f-auth-preview-tiles img{aspect-ratio:1/1;object-fit:cover;width:100%;border-radius:13px}
+  .phase9f-auth-preview-tiles strong{font-size:12px;color:#e6d6c6}
+  .phase9f-auth-preview-tiles span{color:var(--warm2);font-weight:800}
+  .auth-page>.auth-backdrop{z-index:1;background:#0d0909ad;opacity:1;inset:0}
+  .auth-page>.auth-modal{position:relative;z-index:2;width:min(450px,90%);max-width:none;margin:65px auto 0;padding:28px 40px 38px;border-bottom:5px solid var(--warm);border-radius:2px;background:#281a15;box-shadow:0 22px 55px #000a}
+  .phase9f-auth-dialog-tools{display:flex;align-items:center;justify-content:center;position:relative;margin:0 0 22px;color:#eee0d5;font-size:15px}
+  .phase9f-auth-dialog-tools nav{display:flex;gap:6px;align-items:center}
+  .phase9f-auth-dialog-tools nav a[aria-current=page]{color:var(--warm2);font-weight:800}
+  .phase9f-auth-close{position:absolute;right:-20px;top:-20px;color:var(--warm2);font-size:22px;text-decoration:none;line-height:1}
+  .auth-page .auth-modal>h1 {font-size:15px;margin:8px 0 13px;color:#f8eae0}
+  .auth-page .auth-modal>p {font-size:12px;line-height:1.6;margin:0 0 20px}
+  .auth-page .auth-modal .field input{height:44px}
+  .auth-page .auth-modal .btn.wide{height:44px}
+  .auth-page .disabled-social{min-height:35px}
+
+  /* Wallet editing: Figma's two-column form, real profile fields read-only. */
+  .phase9f-wallets-page{max-width:100%}
+  .phase9f-wallets-heading h1{margin:0 0 10px}
+  .phase9f-wallets-description{margin:0 0 24px}
+  .phase9f-wallet-readonly-help{margin:0 0 20px;font-size:11px}
+  .phase9f-wallets-form .field-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px 28px}
+  .phase9f-wallets-form .field{min-width:0}
+  .phase9f-wallets-form .field input,.phase9f-wallets-form .field select{width:100%;min-width:0;height:43px}
+  .phase9f-wallet-primary{font-size:13px}
+  .phase9f-wallet-list-heading{margin-top:40px!important}
+  .phase9f-wallets-page .panel{background:var(--surface)}
+
+  /* Receipt like Figma: dark backdrop, compact receipt with 4 fact columns. */
+  body:has(.phase9f-receipt) .site-header,body:has(.phase9f-receipt) .site-footer{display:none}
+  body:has(.phase9f-receipt) .page{min-height:100vh}
+  .order-panel.phase9f-receipt{position:relative;max-width:595px;width:min(100%,595px);margin:115px auto 85px;padding:45px 34px 34px;border-bottom:7px solid var(--warm);border-radius:0;background:#281913;box-shadow:0 14px 70px #0004}
+  .phase9f-receipt-close{display:block;position:absolute;right:15px;top:12px;color:var(--warm2);font-size:24px;text-decoration:none;line-height:1}
+  .order-panel.phase9f-receipt h1{font-size:17px;margin:15px 0 25px}
+  .phase9f-receipt-meta{display:grid;grid-template-columns:1.2fr .9fr 1fr .9fr;gap:0;margin:0 -34px;padding:16px 19px;background:#38231a;border-block:1px solid var(--warm);text-align:left;font-size:11px;color:#d2b293}
+  .phase9f-receipt-meta>span{display:flex;flex-direction:column;min-width:0;padding:0 11px;border-right:1px solid #73492c}
+  .phase9f-receipt-meta>span:last-child{border-right:0}
+  .phase9f-receipt-meta strong{font-size:12px;font-weight:500;overflow-wrap:anywhere;color:#e7c9ad;margin-top:3px}
+  .phase9f-receipt-details-title{margin:20px 0 8px!important}
+  .phase9f-receipt-columns{display:grid;grid-template-columns:minmax(0,1fr) 80px 105px;gap:10px;text-align:left;font-size:12px;border-bottom:1px solid var(--border);padding:0 0 9px}
+  .phase9f-receipt-columns span:nth-child(n+2){text-align:right}
+  .order-panel .phase9f-receipt-item{display:grid;grid-template-columns:minmax(0,1fr) 80px 105px;gap:10px;align-items:center;border-bottom:none}
+  .phase9f-receipt-item>.row{min-width:0;gap:10px;align-items:center;text-align:left}
+  .phase9f-receipt-item>.row>span{min-width:0;overflow-wrap:anywhere}
+  .phase9f-receipt-qty{color:#cfac91;font-size:12px;text-align:right}
+  .phase9f-receipt-item>.orange{text-align:right;font-size:13px}
+  .order-panel.phase9f-receipt .note{max-width:480px;margin-inline:auto}
+
+  /* Payment: keep real wallet choices and expose demo provider choices, as desktop reference. */
+  .checkout-summary .phase9f-providers.mobile-only{display:block;margin-top:14px}
+  .checkout-summary .phase9f-providers>h2{display:none}
+  .checkout-summary .phase9f-provider{display:flex;width:100%;min-height:48px;align-items:center;gap:12px;padding:9px 12px;margin:0 0 10px;background:#21140e;color:#f6e6da;border:1px solid var(--border);border-radius:6px;text-align:left;font-size:13px}
+  .checkout-summary .phase9f-provider[aria-pressed=true]{border-color:var(--warm)}
+  .checkout-summary .phase9f-provider-icon{display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%;background:#392217;color:var(--warm2)}
+  .checkout-summary .phase9f-provider-check{display:block;width:15px;height:15px;margin-left:auto;border:1px solid #8a5632;border-radius:50%}
+  .checkout-summary .phase9f-provider[aria-pressed=true] .phase9f-provider-check{background:var(--warm);border:4px solid #9f6a3e}
+  .checkout-summary .phase9f-provider-note{display:block;color:var(--muted);font-size:11px;margin:6px 0 18px}
+}
+@media(min-width:641px) and (max-width:960px) {
+  .phase9f-auth-preview-collection{grid-template-columns:170px 1fr;gap:14px}
+  .phase9f-auth-preview-hero h2{font-size:25px}
+  .auth-page>.auth-modal{margin-top:80px}
+  .phase9f-wallets-form .field-grid{gap:16px}
+  .phase9f-receipt-meta{font-size:10px}
+}
+@media(max-width:640px){
+  .phase9f-auth-preview,.phase9f-auth-dialog-tools{display:none}
+  .phase9f-wallets-form .field-grid{display:grid;grid-template-columns:1fr;gap:14px}
+  .phase9f-wallet-readonly-help{margin:0 0 14px}
+  .phase9f-wallet-saved{overflow-wrap:anywhere}
+  .phase9f-receipt-meta{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:0 0 16px;padding:16px;border:1px solid var(--border);font-size:11px}
+  .phase9f-receipt-meta span{display:flex;flex-direction:column;min-width:0}
+  .phase9f-receipt-meta strong{overflow-wrap:anywhere}
+  .phase9f-receipt-columns{display:none}
+  .phase9f-receipt-qty{display:inline-block;margin:0 5px;color:var(--muted);font-size:11px}
+  .phase9f-receipt-close{display:block;position:absolute;right:15px;top:10px;color:var(--warm2);font-size:22px}
+}
+
+/* 9F V5 / Carteiras: valores do perfil sao textos, nao controles editaveis. */
+.phase9f-wallets-form .phase9f-profile-value {
+  display:flex;
+  align-items:center;
+  width:100%;
+  min-width:0;
+  min-height:43px;
+  padding:9px 12px;
+  border:1px solid var(--border);
+  border-radius:3px;
+  background:#1b100d;
+  color:var(--muted);
+  overflow-wrap:anywhere;
+  font-size:13px;
+  line-height:1.4;
+}

@@ -1,0 +1,198 @@
+/* Kurio — Fase 9F, primeira rodada de fidelidade visual.
+   CSS adicional intencionalmente isolado para facilitar revisao e rollback.
+   Referencias: 414x896 mobile, 1440px desktop. Os dados continuam dinamicos. */
+
+/* Texto resumido mobile sem truncar ou perder a versao desktop. */
+.phase9f-mobile-summary { display: none; }
+/* Acessibilidade: nao esconda foco quando o fundo e escuro. */
+:where(.hero,.cart-layout,.checkout-layout,.auth-page) :focus-visible {
+  outline-offset: 3px;
+}
+
+@media (max-width: 640px) {
+  /* Inicio: referencia utiliza banner compacto com composicao lado a lado.
+     Preserva texto e semantica; revisao fina do conteudo segue pendente. */
+  .mobile-search { margin-top: 24px; }
+  .phase9f-desktop-summary { display: none; }
+  .phase9f-mobile-summary { display: inline; }
+  .hero {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0,1.16fr) minmax(0,.84fr);
+    gap: 8px;
+    min-height: 206px;
+    margin: 12px 0 22px;
+    padding: 13px 14px 18px;
+    background: radial-gradient(circle at 40% 48%, #795032 0, #422a1d 63%, #2c1c16 100%);
+    border-radius: 28px;
+    overflow: hidden;
+  }
+  .hero-text { position: relative; z-index: 2; min-width: 0; }
+  .hero-text .kicker { font-size: 10px; letter-spacing: 0; }
+  .hero-text h1 {
+    font-size: clamp(16px,4.6vw,19px);
+    line-height: 1.34;
+    margin: 6px 0 7px;
+    letter-spacing: -.2px;
+    overflow-wrap: normal;
+  }
+  .hero-text p {
+    font-size: 10px;
+    line-height: 1.45;
+    margin: 3px 0 4px;
+  }
+  .hero-text .btn { font-size: 11px; font-weight: 800; }
+  .hero > div:last-child { position: relative; align-self: center; min-width: 0; }
+  .hero-figure {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1 / 1;
+    border-radius: 18px;
+    object-fit: cover;
+  }
+  .hero-dots {
+    display: block;
+    position: absolute;
+    right: 0;
+    bottom: -18px;
+    width: 100%;
+    padding: 0;
+    text-align: center;
+    font-size: 12px;
+    line-height: 1;
+    color: var(--warm2);
+  }
+  .catalog-bar { margin-bottom: 14px; }
+  .catalog-tabs { justify-content: flex-start; gap: 10px; }
+  .catalog-tab { flex: 0 0 auto; }
+  .nft-card .art-wrap { padding: 5px; border-radius: 22px; }
+  .nft-card .art { border-radius: 18px; }
+  .nft-card h3 { line-height: 1.35; }
+  .nft-card .price { line-height: 1.5; }
+
+  /* Detalhe: a referencia tem foto dominante e ficha compacta abaixo. */
+  body:has(.detail-top) .mobile-bar { display: none; }
+  body:has(.detail-top) .page { padding-bottom: 116px !important; }
+  .mobile-detail-head { padding-top: 20px; padding-bottom: 11px; }
+  .detail-top { margin-top: 0; }
+  .detail-hero { padding: 0 28px; }
+  .gallery-viewport { border-radius: 24px; }
+  .detail-info {
+    border-radius: 28px 28px 0 0;
+    margin-top: -20px;
+    padding-top: 24px;
+    padding-bottom: 14px;
+  }
+  .detail-info h1 { font-size: 20px; line-height: 1.35; margin: 0 0 8px; }
+  .detail-info .rating { white-space: nowrap; font-size: 12px; }
+  .detail-info .desc { font-size: 12px; line-height: 1.7; }
+  .detail-info .detail-subtitle { display: none; }
+  .edition-pills { gap: 7px; margin-bottom: 8px; }
+  .edition-pill { padding: 5px 8px; }
+  .details-meta { line-height: 1.6; }
+  .details-meta p { margin: 8px 0; }
+  .mobile-detail-actions {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    margin: 0;
+    z-index: 35;
+    padding: 16px 24px calc(18px + env(safe-area-inset-bottom,0px));
+    box-shadow: 0 -8px 28px #1009068c;
+  }
+  .mobile-detail-actions .btn { min-height: 57px; font-weight: 800; }
+
+  /* Carrinho: os itens mantem suas quantidades reais e o resumo se destaca. */
+  body:has(.cart-layout) .mobile-bar { display: none; }
+  body:has(.cart-layout) .page { padding-bottom: 335px !important; }
+  .cart-heading { margin-top: 18px; margin-bottom: 24px; }
+  .cart-row {
+    min-height: 100px;
+    margin-bottom: 18px;
+    background: var(--surface);
+    border-radius: 17px;
+  }
+  .cart-row .product-inline img { border-radius: 15px; }
+  .cart-row .cart-amount { font-size: 17px; }
+  .cart-summary {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 35;
+    margin: 0;
+    max-height: min(390px,78dvh);
+    overflow-y: auto;
+    border-radius: 26px 26px 0 0;
+    padding: 18px 24px 30px;
+    box-shadow: 0 -6px 25px #09060566;
+  }
+  .cart-summary .promo-form { margin: 8px 0 14px; }
+  .cart-summary .summary-total { border-top: 1px solid var(--border); }
+  .cart-summary .btn.wide { min-height: 56px; font-size: 14px; }
+  .cart-summary > div:last-child { display: none; }
+
+  /* Pagamento mobile: remove a navegacao global que nao aparece na referencia;
+     preserva obrigatoriamente a etapa de revisao da cotacao. */
+  body:has(.checkout-layout) .mobile-bar { display: none; }
+  body:has(.checkout-layout) .page { padding-bottom: 95px !important; }
+  .checkout-heading { margin-top: 20px; margin-bottom: 26px; }
+  .checkout-summary { margin-top: 16px; }
+  .checkout-wallets .wallet-option {
+    min-height: 74px;
+    margin: 12px 0;
+    padding: 16px 14px;
+    border-radius: 16px;
+  }
+  .checkout-summary .btn.wide {
+    bottom: calc(18px + env(safe-area-inset-bottom,0px));
+    width: calc(100% - 56px);
+    left: 28px;
+    min-height: 60px;
+    font-weight: 800;
+    z-index: 45;
+  }
+
+  /* Login e cadastro mobile: hierarquia vertical da referencia 414x896. */
+  body:has(.auth-page) .mobile-bar { display: none; }
+  .auth-page {
+    align-items: flex-start;
+    min-height: 100dvh;
+    padding: clamp(66px,11vh,96px) 28px 32px;
+  }
+  .auth-modal { max-width: 440px; }
+  .auth-modal .brand-mobile {
+    font-size: 32px;
+    font-weight: 900;
+    margin: 18px 0 76px;
+    letter-spacing: 2px;
+  }
+  .auth-modal h1 { font-size: 19px; line-height: 1.4; margin-bottom: 35px; }
+  .auth-modal .field { margin: 12px 0; }
+  .auth-modal .field input { min-height: 49px; border-radius: 10px; }
+  .auth-modal .btn.wide {
+    min-height: 55px;
+    border-radius: 10px;
+    margin-top: 45px;
+  }
+  .auth-modal .auth-alternative { margin-top: 33px; }
+  .auth-modal .disabled-social { min-height: 43px; }
+  .auth-modal .auth-foot { margin-top: 34px !important; }
+
+  /* Protege dispositivos compactos, sem ocultar botoes ou campos. */
+  .summary-line span { white-space: normal; }
+  .cart-row .product-inline strong,
+  .cart-row .product-inline p { overflow-wrap: anywhere; }
+}
+
+@media (max-width: 359px) {
+  .hero { padding: 11px; gap: 4px; }
+  .hero-text h1 { font-size: 16px; }
+  .catalog-tabs { overflow-x: auto; scrollbar-width: none; }
+  .auth-page { padding-inline: 16px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-figure { transition: none; }
+}

@@ -3,7 +3,7 @@ import {expect,test,type Page} from '@playwright/test';
 // The MSW service worker must be ready before using the deterministic demo endpoint.
 test.beforeEach(async({page})=>{
  await page.goto('/');
- await expect(page.getByRole('heading',{name:/SEJA DONO DO FUTURO/})).toBeVisible({timeout:15000});
+ await expect(page.getByRole('heading',{name:/SEJA DONO (?:DO FUTURO|DA CULTURA DIGITAL)/})).toBeVisible({timeout:15000});
  await page.evaluate(async()=>{
   localStorage.removeItem('nft-scenario');
   localStorage.removeItem('nft-token');

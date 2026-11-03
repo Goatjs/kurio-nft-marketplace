@@ -5,7 +5,7 @@ async function resetDemo(page:Page){
   // O Vite devolve index.html para /api/* antes de o MSW controlar a página.
   // A montagem do React ocorre após worker.start(); por isso esperamos o app.
   await page.goto('/');
-  await expect(page.getByRole('heading',{name:/SEJA DONO DO FUTURO/})).toBeVisible({timeout:15000});
+  await expect(page.getByRole('heading',{name:/SEJA DONO (?:DO FUTURO|DA CULTURA DIGITAL)/})).toBeVisible({timeout:15000});
   await expect.poll(async()=>{
     try{
       return await page.evaluate(async()=>{
@@ -21,7 +21,7 @@ async function resetDemo(page:Page){
   });
   // Recarrega após limpar tokens, garantindo instância nova de Router/Query.
   await page.goto('/');
-  await expect(page.getByRole('heading',{name:/SEJA DONO DO FUTURO/})).toBeVisible({timeout:15000});
+  await expect(page.getByRole('heading',{name:/SEJA DONO (?:DO FUTURO|DA CULTURA DIGITAL)/})).toBeVisible({timeout:15000});
 }
 async function login(page:Page,email='alex@example.test',password='Demo123!'){
   await page.goto('/login');

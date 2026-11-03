@@ -3,7 +3,7 @@ import {expect,test} from '@playwright/test';
 /** Fase 9D: navegação assistiva, reflow e preferências de movimento. */
 test('pesquisa desktop ou filtros mobile: estado, Escape e foco',async({page},info)=>{
   await page.goto('/');
-  await expect(page.getByRole('heading',{name:/SEJA DONO DO FUTURO/})).toBeVisible();
+  await expect(page.getByRole('heading',{name:/SEJA DONO (?:DO FUTURO|DA CULTURA DIGITAL)/})).toBeVisible();
   if(info.project.name.includes('mobile')){
     const toggle=page.getByRole('button',{name:'Abrir filtros'});
     await expect(toggle).toHaveAttribute('aria-expanded','false');
