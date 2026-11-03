@@ -71,6 +71,15 @@ Os handlers MSW aceitam dois novos valores na chave `localStorage['nft-scenario'
 - Perfil e senha são alterados por formulários reais, com testes de validação HTML e erros HTTP 409/422/401. Os dados e o avatar devem persistir após refresh; a senha antiga deixa de autenticar.
 - Os novos testes ficam em `tests/phase9a-checkout.spec.ts` e `tests/phase9a-account.spec.ts`. A suíte funcional completa deve ser reexecutada antes de merge e entrega.
 
+
+## Fase 9C — UI, contratos e estado do pedido
+
+- O perfil tem consulta autenticada `GET /api/profile` por Axios + handler MSW, com escopo por sessão. A tela usa TanStack Query (`['profile', userId]`) e invalida o cache de sessão após edição.
+- `Input`, `Button` e `Card` seguem a composição shadcn/ui (forwardRef, className/cn, CVA/Slot no Button) e agora aplicam utilitários Tailwind reais mantendo os estilos Kurio já existentes. `cn` utiliza `tailwind-merge`.
+- Recibos pendentes, confirmados e recusados usam ícones semanticamente diferentes, com rótulo acessível.
+- Testes novos: `tests/phase9c-contract-ui.spec.ts` em Chromium desktop/mobile. Nenhuma integração real de pagamentos ou wallet é adicionada.
+- Após instalação: executar lint, build, novos testes, suíte completa e regressão visual; resultados ainda dependem de validação local.
+
 ## Eventos Socket.IO
 
 - `nft.updated`: `{ eventId, resourceId, version, data }`. Atualiza o cache do NFT e invalida catálogo, carrinho e cotações.
