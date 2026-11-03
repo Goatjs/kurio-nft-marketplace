@@ -41,7 +41,38 @@ function errorForQuote(q:Quote):string|null{
  if(current instanceof HttpResponse)return 'Item esgotado ou indisponível';
  return q.signature===current.signature?null:'Preço ou disponibilidade alterados';
 }
-async function network(){const scenario=localStorage.getItem('nft-scenario');if(scenario==='slow')await delay(1500);if(scenario==='offline')throw new TypeError('Conexão indisponível');}
+/**
+ * KURIO_NETWORK_SCENARIO_9B — respostas REST reproduzíveis via MSW.
+ * O tempo depende apenas dos parâmetros da chamada, nunca de Math.random().
+ * Não interfere em login, carrinho, pedidos ou Socket.IO.
+ */
+function catalogLatencyMs(request: Request, scenario: string): number | null {
+  const url = new URL(request.url);
+  if (scenario === 'variable-latency') {
+    // Hash estável da query inteira; produz um dos três níveis de latência.
+    const signature = url.searchParams.toString();
+    let hash = 0;
+    for (let i = 0; i < signature.length; i++) {
+      hash = (hash * 31 + signature.charCodeAt(i)) >>> 0;
+    }
+    return [120, 450, 900][hash % 3];
+  }
+  if (scenario === 'out-of-order') {
+    const q = (url.searchParams.get('q') ?? '').trim().toLowerCase();
+    // Emerald iniciado primeiro é deliberadamente mais lento que Sage.
+    return q === 'emerald' ? 1800 : q === 'sage' ? 80 : 300;
+  }
+  return null;
+}
+async function network(request?: Request): Promise<number | null> {
+  const scenario = localStorage.getItem('nft-scenario');
+  if (scenario === 'slow') await delay(1500);
+  if (scenario === 'offline') throw new TypeError('Conexão indisponível');
+  if (!request || !scenario) return null;
+  const latencyMs = catalogLatencyMs(request, scenario);
+  if (latencyMs !== null) await delay(latencyMs);
+  return latencyMs;
+}
 function reconcile(order:Order){
  if(order.status==='pending'&&Date.now()-order.createdAt>2200){
   order.status=localStorage.getItem('nft-scenario')==='declined'?'declined':'confirmed';
@@ -66,7 +97,12 @@ export const handlers=[
  }),
  http.post('/api/register',async({request})=>{const body=await request.json() as {email:string;name:string;password:string};if(!body.email?.includes('@')||!body.name?.trim()||body.password?.length<8)return fail(422,'Dados de cadastro inválidos');if(db().users.some(u=>u.email.toLowerCase()===body.email.toLowerCase()))return fail(409,'E-mail já cadastrado');const user={id:crypto.randomUUID(),name:body.name,email:body.email,avatar:'',passwordHash:await hashPassword(body.password)};db().users.push(user);const token=crypto.randomUUID();db().sessions[token]={userId:user.id,expiresAt:Date.now()+1000*60*30};db().carts[user.id]=db().guestCart;db().guestCart=emptyCart();persist();return HttpResponse.json({user:userSafe(user),token},{status:201});}),
  http.post('/api/logout',({request})=>{const token=request.headers.get('Authorization')?.replace(/^Bearer /,'');if(token)delete db().sessions[token];persist();return HttpResponse.json({ok:true});}),
- http.get('/api/nfts',async({request})=>{await network();if(localStorage.getItem('nft-scenario')==='http500')return fail(503,'Serviço temporariamente indisponível');const p=new URL(request.url).searchParams;let items=[...db().nfts];const q=(p.get('q')||'').toLowerCase();const category=p.get('category')||'all';const sort=p.get('sort')||'popular';const page=Math.max(1,Number(p.get('page'))||1);if(q)items=items.filter(n=>(n.title+' '+n.creator).toLowerCase().includes(q));if(category!=='all')items=items.filter(n=>n.category===category);const selectedNetwork=p.get('network')||'all';if(selectedNetwork!=='all')items=items.filter(n=>n.network===selectedNetwork);const maxPrice=p.get('maxPrice');if(maxPrice&&/^\d+(?:\.\d{1,18})?$/.test(maxPrice))items=items.filter(n=>toWei(n.priceEth)<=toWei(maxPrice));if(sort==='price_asc')items.sort((a,b)=>Number(a.priceEth)-Number(b.priceEth));if(sort==='price_desc')items.sort((a,b)=>Number(b.priceEth)-Number(a.priceEth));if(sort==='newest')items.reverse();return HttpResponse.json({items:items.slice((page-1)*9,page*9),total:items.length,page,pageSize:9});}),
+ http.get('/api/nfts',async({request})=>{const simulatedDelayMs=await network(request);if(localStorage.getItem('nft-scenario')==='http500')return fail(503,'Serviço temporariamente indisponível');const p=new URL(request.url).searchParams;let items=[...db().nfts];const q=(p.get('q')||'').toLowerCase();const category=p.get('category')||'all';const sort=p.get('sort')||'popular';const page=Math.max(1,Number(p.get('page'))||1);if(q)items=items.filter(n=>(n.title+' '+n.creator).toLowerCase().includes(q));if(category!=='all')items=items.filter(n=>n.category===category);const selectedNetwork=p.get('network')||'all';if(selectedNetwork!=='all')items=items.filter(n=>n.network===selectedNetwork);const maxPrice=p.get('maxPrice');if(maxPrice&&/^\d+(?:\.\d{1,18})?$/.test(maxPrice))items=items.filter(n=>toWei(n.priceEth)<=toWei(maxPrice));if(sort==='price_asc')items.sort((a,b)=>Number(a.priceEth)-Number(b.priceEth));if(sort==='price_desc')items.sort((a,b)=>Number(b.priceEth)-Number(a.priceEth));if(sort==='newest')items.reverse();return HttpResponse.json(
+    {items:items.slice((page-1)*9,page*9),total:items.length,page,pageSize:9},
+    simulatedDelayMs === null ? undefined : {
+      headers: {'X-Kurio-Mock-Delay-Ms': String(simulatedDelayMs)}
+    }
+  );}),
  http.get('/api/nfts/:id',({params})=>{const item=findNft(String(params.id));return item?HttpResponse.json(item):fail(404,'NFT não encontrado');}),
  http.get('/api/favorites',({request})=>{const user=auth(request);return user?HttpResponse.json(db().favorites[user.id]||[]):fail(401,'Faça login');}),
  http.post('/api/favorites/:id',({request,params})=>{const user=auth(request);if(!user)return fail(401,'Faça login');const id=String(params.id);if(!findNft(id))return fail(404,'NFT não encontrado');const favs=db().favorites[user.id]??=[];if(!favs.includes(id))favs.push(id);persist();return HttpResponse.json(favs);}),

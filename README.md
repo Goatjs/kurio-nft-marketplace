@@ -117,7 +117,28 @@ Cupom válido: `SAVE10`.
 
 ### Simular falhas
 
-No DevTools → Application → Local Storage, defina a chave `nft-scenario` como `slow`, `offline`, `http500`, `timeout` ou `declined` para testar os cenários de rede e pedidos documentados em `ARCHITECTURE.md`.
+No DevTools → Application → Local Storage, defina a chave `nft-scenario` como `slow`, `offline`, `http500`, `timeout`, `declined`, `variable-latency` ou `out-of-order`.
+
+**Fase 9B — latência variável e respostas REST fora de ordem (MSW):** os dois novos modos se aplicam exclusivamente a `GET /api/nfts` e não alteram a API de login, os pedidos nem os eventos Socket.IO. Não há aleatoriedade: os resultados podem ser reproduzidos após refresh.
+
+| Cenário | Comportamento determinístico |
+|---|---|
+| `variable-latency` | A query serializada escolhe 120, 450 ou 900 ms por hash estável. Exemplos com apenas `q`: `Sage` = 120 ms, `Ivory` = 450 ms, `Emerald` = 900 ms. |
+| `out-of-order` | `q=Emerald` responde após 1800 ms; `q=Sage` após 80 ms; outras buscas após 300 ms. Inicie Emerald e logo Sage para observar Sage terminar primeiro. |
+
+Nas respostas desses cenários, o header de diagnóstico `X-Kurio-Mock-Delay-Ms` informa o atraso programado. Isso facilita auditoria sem alterar o JSON do contrato REST. Use os comandos abaixo **no Console do navegador**, após carregar o Kurio:
+
+```js
+localStorage.setItem('nft-scenario', 'out-of-order');
+Promise.all([
+  fetch('/api/nfts?q=Emerald').then(r => r.json()),
+  fetch('/api/nfts?q=Sage').then(r => r.json())
+]);
+// Para voltar ao cenário normal:
+localStorage.removeItem('nft-scenario');
+```
+
+Os testes reproduzíveis estão em `tests/network-latency.spec.ts` e executam as requisições reais interceptadas pelo MSW, além de verificar a interface com TanStack Query.
 
 Para retornar aos dados iniciais, remova `nft-scenario` e execute no Console:
 

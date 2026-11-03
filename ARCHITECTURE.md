@@ -52,6 +52,16 @@ Tokens temporários são gerados pela simulação e persistidos no `localStorage
 
 **Aviso:** `localStorage` como armazenamento de token e base mockada **não são soluções de segurança para uma aplicação real**. As credenciais de teste são públicas por definição; não envie credenciais pessoais.
 
+## Cenários de rede REST determinísticos (Fase 9B)
+
+Os handlers MSW aceitam dois novos valores na chave `localStorage['nft-scenario']`, apenas em `GET /api/nfts`. Os demais handlers, a autenticação e o transporte Socket.IO não são modificados.
+
+- `variable-latency`: o hash estável dos parâmetros serializados da URL seleciona **120, 450 ou 900 ms**. Consultas idênticas recebem a mesma latência; não depende de `Math.random()` nem da ordem global dos requests.
+- `out-of-order`: `q=Emerald` aguarda **1800 ms** e `q=Sage` aguarda **80 ms**; demais valores aguardam **300 ms**. Duas consultas iniciadas nessa sequência podem terminar na ordem inversa.
+- O cabeçalho de diagnóstico `X-Kurio-Mock-Delay-Ms` expõe o atraso programado sem modificar o formato do recurso `CatalogResult`.
+- Os testes `tests/network-latency.spec.ts` verificam tempos/cabeçalhos, ordem efetiva das respostas REST e busca visual que não regride para um resultado obsoleto. O `AbortSignal` do Axios, as chaves do TanStack Query e o estado de URL continuam responsáveis pelo descarte de buscas antigas.
+- `slow`, `offline`, `http500`, `timeout` e `declined` mantêm os comportamentos anteriores. A chave pode ser removida para restaurar o cenário padrão.
+
 ## Eventos Socket.IO
 
 - `nft.updated`: `{ eventId, resourceId, version, data }`. Atualiza o cache do NFT e invalida catálogo, carrinho e cotações.
