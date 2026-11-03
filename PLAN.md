@@ -34,3 +34,12 @@
 - [ ] Deploy público com fallback de rotas e MSW ativado.
 
 **Atenção:** checkboxes indicam arquivos de implementação criados, não a execução validada. A primeira etapa precisa passar por `npm run typecheck`, `npm run build` e testes antes de ser considerada validada.
+
+## Fase 9E — consolidação de evidências (novembro de 2026)
+
+- [x] Infraestrutura de relatório de testes e smoke do deploy preparada.
+- [x] Workflow de CI para lint, build e Playwright funcional preparado.
+- [ ] Rodar as validações da Fase 9E na máquina de entrega e inspecionar os relatórios reais.
+- [ ] Executar Lighthouse 3× por perfil/página e conferir as medianas.
+- [ ] Revisar manualmente a fidelidade das oito referências Figma.
+- [ ] Confirmar deploy pós-merge e checks verdes.

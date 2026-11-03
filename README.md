@@ -230,3 +230,7 @@ PLAN.md                Registro das etapas
 A busca do cabeçalho, os filtros mobile e as abas de detalhe possuem semântica acessível e navegação por teclado. O reflow em larguras compactas foi refinado sem substituir as capturas de referência.
 
 Valide com `npx playwright test tests/phase9d-accessibility.spec.ts --workers=2` e `npx playwright test --config=playwright.visual.config.ts`. Gere o comparativo manual com `node scripts/phase9d-visual-review.mjs` e abra `reports/fase9d-revisao-figma.html`. Veja o checklist em [`docs/FASE9D-REVISAO-VISUAL.md`](./docs/FASE9D-REVISAO-VISUAL.md). **Snapshots aprovados não provam automaticamente fidelidade ao Figma.**
+
+## Fase 9E — evidências de entrega
+
+A fase final adiciona smoke de rotas e MSW no domínio público, um relatório de evidências gerado a partir de execução real e uma verificação funcional via GitHub Actions. Execute `node scripts/phase9e-validate.mjs` para lint, build, Playwright local/visual e smoke na Vercel. Use `--lighthouse` para incluir medições de 3 rodadas mobile/desktop, nas duas páginas de auditoria. Veja [`docs/FASE9E-ENTREGA.md`](./docs/FASE9E-ENTREGA.md) para os critérios finais. **Não interprete baselines Playwright aprovadas como aprovação manual do Figma.**

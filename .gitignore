@@ -12,3 +12,7 @@ playwright-report-public/
 test-results/
 coverage/
 *.tsbuildinfo
+
+# Fase 9E — evidências geradas e backups locais
+reports/
+*.bak-fase9e*
