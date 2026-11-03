@@ -37,6 +37,22 @@
 
 Detalhes dos contratos, decisões e limitações estão em [`ARCHITECTURE.md`](./ARCHITECTURE.md).
 
+## Fase 9A — testes E2E dos fluxos críticos
+
+Dois arquivos de teste ampliam a verificação da aplicação, utilizando a interface real do Kurio, Axios, APIs simuladas por MSW e o cliente `socket.io-client`:
+
+- `tests/phase9a-checkout.spec.ts`: compra do catálogo ao recibo após login; recibo imutável mesmo com alteração posterior do catálogo; pagamento recusado com carrinho preservado; timeout após criação com Socket.IO desconectado, reconexão e recuperação pela chave de idempotência; erro HTTP 503 com recuperação visual.
+- `tests/phase9a-account.spec.ts`: alteração de perfil e avatar com persistência após refresh; validação de e-mail, conflito 409; senha incorreta, confirmação divergente e troca válida, seguida de login com a senha nova.
+
+Execute em ambiente local com MSW habilitado:
+
+```bash
+npx playwright test tests/phase9a-checkout.spec.ts tests/phase9a-account.spec.ts
+npx playwright test
+```
+
+Esses testes **não** alteram os componentes de produção. Cada teste inicia com reset determinístico via `POST /api/demo/reset`; os cenários de falha são configurados com `nft-scenario`. Verifique os resultados antes de registrar qualquer contagem de testes como aprovada.
+
 ## Evidências de validação
 
 Resultados reportados após execução em Windows/Chrome, em **02/11/2026**. As pontuações podem variar conforme hardware, navegador e rede.

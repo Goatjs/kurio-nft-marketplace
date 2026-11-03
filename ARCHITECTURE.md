@@ -62,6 +62,15 @@ Os handlers MSW aceitam dois novos valores na chave `localStorage['nft-scenario'
 - Os testes `tests/network-latency.spec.ts` verificam tempos/cabeçalhos, ordem efetiva das respostas REST e busca visual que não regride para um resultado obsoleto. O `AbortSignal` do Axios, as chaves do TanStack Query e o estado de URL continuam responsáveis pelo descarte de buscas antigas.
 - `slow`, `offline`, `http500`, `timeout` e `declined` mantêm os comportamentos anteriores. A chave pode ser removida para restaurar o cenário padrão.
 
+## Verificação de fluxos críticos — Fase 9A
+
+- As jornadas completas são verificadas em Playwright desktop/mobile e percorrem catálogo, detalhe do NFT, carrinho, login, checkout, revisão, pedido e recibo **pela interface**, sem gerar um pedido diretamente por `fetch` no teste.
+- As consultas de verificação (`GET /api/orders/:id`, `GET /api/cart`, `GET /api/session` e recuperação `GET /api/orders/by-key/:key`) passam por handlers REST do MSW.
+- Os cenários `declined`, `http500` e `timeout` exercitam os erros reais da API simulada. A queda e restauração do WebSocket utilizam endpoints de controle MSW, enquanto a reconexão depende do cliente Socket.IO efetivo.
+- Após timeout, a UI usa a chave em `sessionStorage['kurio-pending-checkout']` para recuperar a tentativa anterior; o teste também confere que a fixture simulada guarda apenas um pedido.
+- Perfil e senha são alterados por formulários reais, com testes de validação HTML e erros HTTP 409/422/401. Os dados e o avatar devem persistir após refresh; a senha antiga deixa de autenticar.
+- Os novos testes ficam em `tests/phase9a-checkout.spec.ts` e `tests/phase9a-account.spec.ts`. A suíte funcional completa deve ser reexecutada antes de merge e entrega.
+
 ## Eventos Socket.IO
 
 - `nft.updated`: `{ eventId, resourceId, version, data }`. Atualiza o cache do NFT e invalida catálogo, carrinho e cotações.
