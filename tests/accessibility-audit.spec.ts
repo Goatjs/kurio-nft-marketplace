@@ -52,8 +52,7 @@ for (const target of pages) {
       contentType: 'application/json',
     });
 
-    // Primeira etapa: diagnóstico, sem reprovar por violações.
-    // Após corrigir os problemas, adicionaremos:
-    // expect(results.violations).toEqual([]);
+    // Reprova o teste se o axe-core detectar violações WCAG.
+    expect(results.violations).toEqual([]);
   });
 }
