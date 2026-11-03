@@ -223,3 +223,10 @@ PLAN.md                Registro das etapas
 - Há aviso de chunk JS >500 KB no Vite. O build e as metas Lighthouse passaram; uma divisão adicional do bundle é possível.
 
 **Uso pretendido:** avaliação de frontend e demonstração técnica, não operação comercial ou financeira.
+
+
+## Fase 9D — acessibilidade e revisão visual
+
+A busca do cabeçalho, os filtros mobile e as abas de detalhe possuem semântica acessível e navegação por teclado. O reflow em larguras compactas foi refinado sem substituir as capturas de referência.
+
+Valide com `npx playwright test tests/phase9d-accessibility.spec.ts --workers=2` e `npx playwright test --config=playwright.visual.config.ts`. Gere o comparativo manual com `node scripts/phase9d-visual-review.mjs` e abra `reports/fase9d-revisao-figma.html`. Veja o checklist em [`docs/FASE9D-REVISAO-VISUAL.md`](./docs/FASE9D-REVISAO-VISUAL.md). **Snapshots aprovados não provam automaticamente fidelidade ao Figma.**
