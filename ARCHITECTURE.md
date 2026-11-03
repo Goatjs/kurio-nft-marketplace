@@ -107,3 +107,12 @@ As rotas `/`, `/nfts/nft-1`, `/cart`, `/checkout` e `/login` responderam HTTP 20
 ## Limitações deliberadas
 
 Sem banco remoto, login real, autorização de produção, pagamentos, APIs blockchain, transações e garantias de dados entre navegadores. Algumas entradas institucionais da interface são decorativas e OAuth está desativado. Os NFTs foram extraídos de capturas recebidas; para melhorar a arte, exporte os assets originais do Figma. Existe um aviso não bloqueante de chunk JS >500 KB no Vite.
+
+
+## Fase 9D — navegação, reflow e auditoria visual
+
+- A busca desktop expõe estado `aria-expanded`, landmark `search` e retorno de foco ao fechar com Escape; os filtros mobile expõem uma região nomeada e restauram o foco ao botão de abertura.
+- As abas de detalhes têm `tablist`, `tab`, `tabpanel`, `aria-selected` e alternância por setas/Home/End. Os controles da galeria mobile preservam seleção acessível.
+- CSS adicional incide apenas abaixo de 360 px, evitando alteração das baselines em 390/768/1440 px. Essa abordagem não garante ausência de regressões; os testes visuais devem ser executados.
+- `tests/phase9d-accessibility.spec.ts` adiciona verificação desktop/mobile de semântica, foco, reflow (320/390/768/1440) e redução de movimento.
+- `scripts/phase9d-visual-review.mjs` produz um comparativo local das oito referências Figma com as baselines Windows. Auditoria visual manual permanece pendente até revisão das diferenças.

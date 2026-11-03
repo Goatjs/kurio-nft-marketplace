@@ -212,3 +212,16 @@
     min-height: 44px;
   }
 }
+
+/* Fase 9D — ajustes apenas para larguras compactas (menos de 360 px).
+   Preserva as baselines existentes em 390, 768 e 1440 px. */
+@media (max-width: 359px) {
+  .shell { padding-inline: 16px; }
+  .hero { gap: 4px; padding: 12px; }
+  .hero-text h1 { font-size: 18px; }
+  .catalog-tabs { gap: 4px; }
+  .catalog-tab { font-size: 11px; }
+  .detail-visual { margin-inline: -16px; }
+  .detail-info { margin-inline: -16px; padding-inline: 16px; }
+  .mobile-detail-actions { margin-inline: -16px; padding-inline: 16px; }
+}
