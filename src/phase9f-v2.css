@@ -1,0 +1,55 @@
+/* Kurio Fase 9F — V2, refinamento mobile das referencias 414 x 896.
+   Importado depois de phase9f.css; remova o import para reverter.
+   Nenhuma transacao, carteira ou preco de teste e modificado por CSS. */
+.phase9f-mobile-heading,.phase9f-inline-price,.phase9f-hero-overlay{display:none}
+@media(max-width:640px){
+  /* Hero: texto e composicao da referencia, sem mudar titulo desktop. */
+  .phase9f-desktop-heading{display:none}
+  .phase9f-mobile-heading{display:block}
+  .hero{grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);min-height:205px;gap:7px}
+  .hero-text h1{font-size:clamp(18px,5vw,22px);line-height:1.34;letter-spacing:-.15px;margin:8px 0}
+  .phase9f-hero-art{position:relative;min-width:0;align-self:center}
+  .phase9f-hero-art .hero-figure{width:100%;height:auto;aspect-ratio:1/1;object-fit:cover}
+  .phase9f-hero-overlay{display:block;position:absolute;left:-6px;bottom:5px;width:53%;aspect-ratio:1/1;object-fit:cover;border:2px solid #dfd2a6;border-radius:16px;box-shadow:0 6px 16px #170e0c88}
+  .phase9f-hero-art .hero-dots{bottom:-18px}
+  /* A contagem continua anunciada a tecnologias assistivas sem deslocar os cards. */
+  body:has(.hero) .catalog-main>.small-copy.muted[role="status"]{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px!important;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+  .catalog-bar{margin-top:5px;margin-bottom:17px}
+  .catalog-tabs{gap:8px}
+  .catalog-tab{font-size:clamp(11px,2.9vw,13px)}
+
+  /* Detalhe: quantidade e preco na mesma linha; comprar na barra inferior. */
+  .detail-actions{display:flex;align-items:center;justify-content:space-between;margin:12px 0 16px;gap:10px}
+  .detail-actions>.btn,.detail-actions>.card-fav{display:none}
+  .phase9f-inline-price{display:inline-block;white-space:nowrap;font-size:18px;font-weight:900;color:var(--warm2);margin-left:auto}
+  .details-meta p:nth-child(n+4){display:none}
+  .mobile-detail-actions .btn{min-height:58px}
+  .detail-info{padding-bottom:15px}
+  .detail-info .desc{margin-bottom:10px}
+  .gallery-mobile-controls{bottom:14px}
+
+  /* Carrinho: nao mascara quantidades ou itens reais. */
+  .cart-row .product-inline{min-width:0}
+  .cart-row .product-inline strong{font-size:14px;line-height:1.35}
+  .cart-row .cart-amount{font-size:17px}
+  .cart-summary .summary-line{gap:10px}
+  .cart-summary .summary-total{border-top:1px solid var(--border);padding-top:14px}
+
+  /* Recibo: legibilidade a 414 px e telas compactas sem suprimir dados. */
+  body:has(.order-panel) .mobile-bar{display:none}
+  .order-panel{width:100%;max-width:530px;margin:28px auto 36px;padding:20px 15px 25px;overflow-wrap:anywhere}
+  .order-panel h1{font-size:17px;line-height:1.5;margin:14px 0 20px}
+  .order-panel .receipt-row{gap:8px;min-width:0}
+  .order-panel .receipt-row>div{min-width:0}
+  .order-panel .receipt-row img{flex:0 0 auto}
+  .order-panel .receipt-total{font-size:18px}
+  .order-panel a,.order-panel button{max-width:100%}
+}
+@media(max-width:359px){
+  .hero-text h1{font-size:17px}
+  .phase9f-hero-overlay{left:-3px;width:48%}
+  .detail-actions{gap:6px}
+  .phase9f-inline-price{font-size:16px}
+  .cart-row .product-inline strong{font-size:12px}
+}
+@media(prefers-reduced-motion:reduce){.phase9f-hero-overlay{transition:none}}

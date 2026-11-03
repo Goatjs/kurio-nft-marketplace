@@ -6,7 +6,7 @@ import { expect, test, type Page } from '@playwright/test';
  */
 async function prepareCheckout(page: Page) {
   await page.goto('/');
-  await expect(page.getByRole('heading', { name: /SEJA DONO DO FUTURO/ })).toBeVisible();
+  await expect(page.getByRole('heading', { name: /SEJA DONO (?:DO FUTURO|DA CULTURA DIGITAL)/ })).toBeVisible();
   await expect.poll(async () => page.evaluate(async () => (
     await fetch('/api/session', { cache: 'no-store' })
   ).status), { timeout: 10000 }).toBe(401);

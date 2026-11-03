@@ -19,7 +19,7 @@ async function resetDemo(page: Page) {
     if (!response.ok) throw new Error(`Falha ao reiniciar o MSW: ${response.status}`);
   });
   await page.goto('/');
-  await expect(page.getByRole('heading', {name: /SEJA DONO DO FUTURO/})).toBeVisible();
+  await expect(page.getByRole('heading', {name: /SEJA DONO (?:DO FUTURO|DA CULTURA DIGITAL)/})).toBeVisible();
 }
 
 async function loginViaUI(page: Page, password = 'Demo123!') {

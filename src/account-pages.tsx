@@ -57,23 +57,29 @@ function Profile(){
 }
 export function WalletsPage(){return <Required><Wallets/></Required>}
 function Wallets(){
- const qc=useQueryClient();const {data:wallets=[],isPending}=useQuery({queryKey:['wallets'],queryFn:api.wallets});
+ const qc=useQueryClient();const {data:profileUser}=useSession();const {data:wallets=[],isPending}=useQuery({queryKey:['wallets'],queryFn:api.wallets});
  const [editId,setEditId]=useState<string|null>(null);const [label,setLabel]=useState('');const [address,setAddress]=useState('');const [network,setNetwork]=useState<Wallet['network']>('Ethereum');const [primary,setPrimary]=useState(false);
  const reset=()=>{setEditId(null);setLabel('');setAddress('');setNetwork('Ethereum');setPrimary(false)};
  const m=useMutation({mutationFn:()=>editId?api.updateWallet(editId,{label,address,network,primary}):api.addWallet({label,address,network,primary}),onSuccess:()=>{reset();void qc.invalidateQueries({queryKey:['wallets']})}});
- return <AccountShell section="wallets"><div className="row" style={{justifyContent:'space-between'}}><h1>Carteira principal</h1><button className="text-link" type="button" onClick={reset}>Adicionar</button></div>
- <p className="note" style={{margin:'-18px 0 25px'}}>Estas carteiras ficam disponíveis no pagamento e para receber NFTs comprados.</p>
- {isPending?<Loading count={1}/>:wallets.map(w=><div key={w.id} className="panel" style={{marginBottom:12}}><div className="row" style={{justifyContent:'space-between'}}><b>{w.label} · {w.network} {w.primary?'· Principal':'· Secundária'}</b><button type="button" className="text-link" onClick={()=>{setEditId(w.id);setLabel(w.label);setAddress(w.address);setNetwork(w.network);setPrimary(w.primary)}}>Editar</button></div><p className="note" style={{wordBreak:'break-all'}}>{w.address}</p></div>)}
- <h2>{editId?'Editar carteira':'Adicionar carteira de teste'}</h2>
- <form onSubmit={e=>{e.preventDefault();m.mutate()}}><div className="field-grid">
-
+ return <AccountShell section="wallets"><div className="phase9f-wallets-page"><div className="row phase9f-wallets-heading" style={{justifyContent:'space-between'}}><h1>Carteira principal</h1><button className="text-link" type="button" onClick={reset}>Adicionar</button></div>
+ <p className="note phase9f-wallets-description">Estas carteiras ficam disponíveis no pagamento e para receber NFTs comprados.</p>
+ <form className="phase9f-wallets-form" onSubmit={e=>{e.preventDefault();m.mutate()}}>
+ <p className="note phase9f-wallet-readonly-help" id="phase9f-wallet-help">Os dados do perfil são apenas informativos nesta tela. Para alterá-los, acesse Dados do perfil.</p>
+ <div className="field-grid">
+ <div className="field phase9f-profile-info"><span>Nome de exibição</span><div className="phase9f-profile-value">{profileUser?.name || 'Não informado'}</div></div>
  <label className="field"><span>Apelido da carteira *</span><Input required value={label} onChange={e=>setLabel(e.target.value)} placeholder="Minha carteira"/></label>
  <label className="field"><span>Rede *</span><select value={network} onChange={e=>setNetwork(e.target.value as Wallet['network'])}><option>Ethereum</option><option>Polygon</option></select></label>
-
+ <div className="field phase9f-profile-info"><span>Nome do perfil</span><div className="phase9f-profile-value">{profileUser?.username || 'Não informado'}</div></div>
  <label className="field"><span>Endereço da carteira *</span><Input required pattern="0x[a-fA-F0-9]{40}" value={address} onChange={e=>setAddress(e.target.value)} placeholder="Endereço 0x da carteira"/></label>
+ <div className="field phase9f-profile-info"><span>ENS do perfil</span><div className="phase9f-profile-value">{profileUser?.ens || 'Não informado'}</div></div>
+ <div className="field phase9f-profile-info"><span>Tipo de carteira</span><div className="phase9f-profile-value">Carteira de teste</div></div>
+ <div className="field phase9f-profile-info"><span>E-mail do perfil</span><div className="phase9f-profile-value">{profileUser?.email || 'Não informado'}</div></div>
  </div>
- <label className="row" style={{margin:'20px 0'}}><input type="checkbox" checked={primary} onChange={e=>setPrimary(e.target.checked)}/> Definir como carteira principal</label>
+ <label className="row phase9f-wallet-primary" style={{margin:'20px 0'}}><input type="checkbox" checked={primary} onChange={e=>setPrimary(e.target.checked)}/> Definir como carteira principal</label>
  <div className="row"><Button type="submit" disabled={m.isPending}>{editId?'Atualizar carteira':'Salvar carteira'}</Button>{editId&&<Button type="button" variant="secondary" onClick={reset}>Cancelar</Button>}</div>
  {m.isError&&<Feedback message={errorMessage(m.error)}/>} {m.isSuccess&&<p role="status" className="success">Carteira salva.</p>}
- </form><h2>Carteira secundária</h2><p className="note">{wallets.some(w=>!w.primary)?'As carteiras secundárias estão listadas acima.':'Você ainda não adicionou uma carteira secundária.'}</p></AccountShell>
+ </form>
+ <h2 className="phase9f-wallet-list-heading">Carteiras cadastradas</h2>
+ {isPending?<Loading count={1}/>:wallets.map(w=><div key={w.id} className="panel phase9f-wallet-saved" style={{marginBottom:12}}><div className="row" style={{justifyContent:'space-between'}}><b>{w.label} · {w.network} {w.primary?'· Principal':'· Secundária'}</b><button type="button" className="text-link" onClick={()=>{setEditId(w.id);setLabel(w.label);setAddress(w.address);setNetwork(w.network);setPrimary(w.primary)}}>Editar</button></div><p className="note" style={{wordBreak:'break-all'}}>{w.address}</p></div>)}
+ <h2>Carteira secundária</h2><p className="note">{wallets.some(w=>!w.primary)?'As carteiras secundárias estão listadas acima.':'Você ainda não adicionou uma carteira secundária.'}</p></div></AccountShell>
 }

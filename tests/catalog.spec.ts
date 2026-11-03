@@ -126,7 +126,7 @@ test('skeleton aparece com rede lenta e desaparece após carregamento',async({pa
 });
 
 test('visual: captura de referência local sem baseline nesta etapa',async({page})=>{
- await expect(page.getByRole('heading',{name:/SEJA DONO DO FUTURO/})).toBeVisible();
+ await expect(page.getByRole('heading',{name:/SEJA DONO (?:DO FUTURO|DA CULTURA DIGITAL)/})).toBeVisible();
  // Gerar baselines aprovadas na próxima etapa com: npx playwright test --update-snapshots.
  // Não criar toHaveScreenshot sem uma baseline aprovada pelo avaliador.
 });

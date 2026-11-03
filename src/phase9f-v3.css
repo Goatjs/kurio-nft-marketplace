@@ -1,0 +1,52 @@
+/* KURIO 9F V3 — detalhe e pagamento mobile das referencias, sem alterar simulacoes. */
+.phase9f-checkout-header,.phase9f-wallet-group-title,.phase9f-providers,.phase9f-state-label,.phase9f-mobile-purchase-line{display:none}
+@media(max-width:640px){
+/* Detalhe: quantidade + valor no painel fixo de compra. */
+body:has(.detail-top) .page{padding-bottom:180px!important}
+.detail-info .detail-actions{display:none}
+.detail-info{padding-bottom:22px}
+.mobile-detail-actions{display:flex;flex-direction:column;align-items:stretch;gap:12px;padding:14px 24px calc(18px + env(safe-area-inset-bottom,0px));border-radius:28px 28px 0 0}
+.phase9f-mobile-purchase-line{width:100%;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.phase9f-mobile-purchase-line .qty{gap:9px}
+.phase9f-mobile-purchase-line .qty button{width:26px;height:33px}
+.phase9f-qty-label{font-size:13px;color:#dbc2a7}
+.phase9f-bottom-price{font-size:18px;font-weight:900;color:var(--warm2);white-space:nowrap}
+.phase9f-mobile-purchase-buttons{width:100%;display:flex;align-items:center;gap:12px}
+.phase9f-mobile-purchase-buttons>.btn{flex:0 1 65%;min-height:58px}
+.phase9f-mobile-purchase-buttons>.round-btn{flex:0 0 54px;height:54px}
+/* Pagamento: cartoes de carteira, provedores demonstrativos, total e CTA. */
+.phase9f-checkout-header{display:flex;align-items:center;gap:16px;margin:26px 0 21px}
+.phase9f-checkout-back{display:inline-flex;flex:0 0 38px;width:38px;height:38px;align-items:center;justify-content:center;border:1px solid var(--border);border-radius:50%;background:#2a1913;color:var(--warm2);font-size:26px;line-height:1}
+.phase9f-checkout-header .checkout-heading{text-align:left;margin:0;font-size:20px;line-height:1.35}
+.checkout-summary{display:flex;flex-direction:column;margin-top:0}
+.checkout-summary>h2{display:none}
+.checkout-summary>.checkout-wallets{order:1;margin-top:0}
+.checkout-summary>div[aria-live="polite"]{order:2;margin:10px 0 7px}
+.checkout-summary>.error,.checkout-summary>.success{order:3}
+.checkout-summary>.btn.wide{order:4}
+.checkout-summary>.note{order:5;margin-top:15px!important;line-height:1.5}
+.phase9f-desktop-wallet-heading{display:none!important}
+.phase9f-wallet-group-title{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:13px}
+.phase9f-wallet-group-title h2{font-size:15px;margin:0;font-weight:800}
+.phase9f-wallet-group-title a{color:var(--warm2);font-size:13px;font-weight:700}
+.checkout-wallets>.wallet-option{border:1px solid transparent;background:var(--surface);min-height:82px;padding:16px 18px;border-radius:17px;margin:0 0 12px}
+.checkout-wallets>.wallet-option.checked{border-color:var(--warm)}
+.checkout-wallets>.wallet-option>span{min-width:0}
+.checkout-wallets>.wallet-option strong{font-size:15px}
+.checkout-wallets>.wallet-option p{font-size:12px;line-height:1.5;overflow-wrap:anywhere}
+.phase9f-providers{display:block;margin-top:10px}
+.phase9f-providers h2{font-size:16px;margin:10px 0 14px}
+.phase9f-provider{width:100%;min-height:68px;border:1px solid transparent;border-radius:16px;background:var(--surface);color:#f2e9e3;display:flex;align-items:center;gap:13px;text-align:left;padding:10px 14px;margin-bottom:11px;font:inherit;font-size:14px}
+.phase9f-provider[aria-pressed="true"]{border-color:var(--warm)}
+.phase9f-provider-icon{width:42px;height:42px;flex:none;display:flex;align-items:center;justify-content:center;border-radius:50%;background:#382119;border:1px solid var(--border);color:var(--warm2);font-weight:800}
+.phase9f-provider-check{width:17px;height:17px;flex:none;margin-left:auto;border:1px solid #8f623f;border-radius:50%}
+.phase9f-provider[aria-pressed="true"] .phase9f-provider-check{border:4px solid var(--warm);background:#2b1b16}
+.phase9f-provider-note{font-size:11px;line-height:1.45;color:var(--muted);margin:1px 0 16px}
+.phase9f-state-label{display:block;margin:4px 0 2px;font-size:11px;color:var(--muted)}
+.checkout-wallets>.row{margin:3px 0 9px!important;gap:8px;font-size:11px}
+.checkout-wallets>.row .small-copy{font-size:11px}
+.checkout-summary .summary-total{margin-top:12px}
+.checkout-summary>.btn.wide{bottom:calc(18px + env(safe-area-inset-bottom,0px));left:24px;width:calc(100% - 48px);border-radius:32px;min-height:60px;font-size:14px}
+body:has(.checkout-layout) .page{padding-bottom:125px!important}
+}
+@media(max-width:359px){.mobile-detail-actions{padding-inline:16px}.phase9f-bottom-price{font-size:16px}.phase9f-checkout-header{gap:10px}.phase9f-checkout-header .checkout-heading{font-size:18px}.checkout-summary>.btn.wide{left:16px;width:calc(100% - 32px)}}

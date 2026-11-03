@@ -15,7 +15,7 @@ const DEMO_USER = { email: 'alex@example.test', password: 'Demo123!' };
 // O cenário padrão é determinístico; reset é feito pelo handler de rede MSW.
 test.beforeEach(async ({ page }) => {
   await page.goto('/');
-  await expect(page.getByRole('heading', { name: /SEJA DONO DO FUTURO/ })).toBeVisible();
+  await expect(page.getByRole('heading', { name: /SEJA DONO (?:DO FUTURO|DA CULTURA DIGITAL)/ })).toBeVisible();
   await expect.poll(async () => page.evaluate(async () => {
     return (await fetch('/api/session', { cache: 'no-store' })).status;
   }), { timeout: 10_000 }).toBe(401);

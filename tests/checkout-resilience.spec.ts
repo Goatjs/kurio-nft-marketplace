@@ -16,7 +16,7 @@ type OrderResult = {
 
 test.beforeEach(async ({ page }) => {
   await page.goto('/');
-  await expect(page.getByRole('heading', { name: /SEJA DONO DO FUTURO/ })).toBeVisible();
+  await expect(page.getByRole('heading', { name: /SEJA DONO (?:DO FUTURO|DA CULTURA DIGITAL)/ })).toBeVisible();
 
   // Confirmar que as chamadas REST estão sendo interceptadas pelo MSW
   // ANTES de iniciar o cenário. Um 404 aqui é o servidor Vite, não a API simulada.

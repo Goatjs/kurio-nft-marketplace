@@ -5,6 +5,11 @@ import {QueryClient,QueryClientProvider} from '@tanstack/react-query';
 import {createRootRoute,createRoute,createRouter,RouterProvider} from '@tanstack/react-router';
 import {Home,Market,Layout,NotFound} from './pages';
 import './styles.css';
+import './phase9f.css';
+import './phase9f-v2.css';
+import './phase9f-v3.css';
+import './phase9f-v4.css';
+import './phase9f-v5.css';
 const LoginPage = React.lazy(() => import('./auth-pages').then(m => ({default: m.LoginPage})));
 const RegisterPage = React.lazy(() => import('./auth-pages').then(m => ({default: m.RegisterPage})));
 function LoginRoute(){return <React.Suspense fallback={<div role="status" className="panel">Carregando...</div>}><LoginPage/></React.Suspense>}
