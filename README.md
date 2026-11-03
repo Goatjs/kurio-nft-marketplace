@@ -113,10 +113,33 @@ npm run dev
 
 Abra `http://localhost:5173`. O script `postinstall` executa `msw init public --save`; `public/mockServiceWorker.js` também está versionado.
 
+### Variáveis de ambiente e mocks
+
+- **`VITE_ENABLE_MSW`**: controla a ativação dos mocks REST e Socket.IO no navegador. O aplicativo inicia o MSW por padrão; qualquer valor diferente da string `false` mantém a simulação ativa. Para deixar a configuração explícita em desenvolvimento, testes ou no build da Vercel, use `VITE_ENABLE_MSW=true`.
+- **`VITE_ENABLE_MSW=false`**: desativa o MSW. Como o desafio não possui backend real, os fluxos de API, autenticação, carteiras e pagamento simulados deixarão de funcionar. **Não use essa opção na entrega de avaliação.**
+- Não são necessárias chaves privadas, tokens de terceiros, endpoints externos nem arquivos `.env` para executar o projeto com o cenário padrão. Variáveis `VITE_*` são inseridas no frontend durante o build; nunca coloque segredos nelas.
+
+Exemplo opcional para executar com a simulação explicitamente habilitada no PowerShell:
+
+```powershell
+$env:VITE_ENABLE_MSW = 'true'
+npm run dev
+```
+
+### Build otimizado e preview local
+
+```bash
+npm run build
+npm run preview
+```
+
+Abra `http://localhost:4173`. O `preview` serve a pasta `dist/` gerada pelo build, com MSW habilitado por padrão. Para interromper, use `Ctrl+C`.
+
 ### Comandos de qualidade
 
 ```
 npm run lint
+npm run typecheck
 npm run build
 npx playwright install chromium
 npx playwright test --workers=1
