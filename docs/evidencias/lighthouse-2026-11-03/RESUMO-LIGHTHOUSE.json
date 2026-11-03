@@ -1,0 +1,94 @@
+{
+  "createdAt": "2026-11-03T20:14:34.621Z",
+  "rows": [
+    {
+      "profile": "mobile",
+      "page": "Início",
+      "pathname": "/",
+      "runs": 3,
+      "grades": {
+        "performance": 88,
+        "accessibility": 98,
+        "best-practices": 96,
+        "seo": 92
+      },
+      "lcpMs": 3123.45835,
+      "cls": 0.02916160388821385,
+      "tbtMs": 32,
+      "files": [
+        "127_0_0_1--2026_11_03_20_05_38.report.json",
+        "127_0_0_1--2026_11_03_20_06_07.report.json",
+        "127_0_0_1--2026_11_03_20_06_28.report.json"
+      ],
+      "lighthouseVersion": "12.6.1",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.0.0 Safari/537.36"
+    },
+    {
+      "profile": "mobile",
+      "page": "Detalhe do NFT",
+      "pathname": "/nfts/nft-1",
+      "runs": 3,
+      "grades": {
+        "performance": 89,
+        "accessibility": 96,
+        "best-practices": 96,
+        "seo": 92
+      },
+      "lcpMs": 3089.1494099999995,
+      "cls": 0,
+      "tbtMs": 36.5,
+      "files": [
+        "127_0_0_1-nfts_nft_1-2026_11_03_20_06_48.report.json",
+        "127_0_0_1-nfts_nft_1-2026_11_03_20_07_08.report.json",
+        "127_0_0_1-nfts_nft_1-2026_11_03_20_07_29.report.json"
+      ],
+      "lighthouseVersion": "12.6.1",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.0.0 Safari/537.36"
+    },
+    {
+      "profile": "desktop",
+      "page": "Início",
+      "pathname": "/",
+      "runs": 3,
+      "grades": {
+        "performance": 99,
+        "accessibility": 100,
+        "best-practices": 96,
+        "seo": 92
+      },
+      "lcpMs": 784.1296600000001,
+      "cls": 0,
+      "tbtMs": 0,
+      "files": [
+        "127_0_0_1--2026_11_03_20_12_03.report.json",
+        "127_0_0_1--2026_11_03_20_12_24.report.json",
+        "127_0_0_1--2026_11_03_20_12_43.report.json"
+      ],
+      "lighthouseVersion": "12.6.1",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.0.0 Safari/537.36"
+    },
+    {
+      "profile": "desktop",
+      "page": "Detalhe do NFT",
+      "pathname": "/nfts/nft-1",
+      "runs": 3,
+      "grades": {
+        "performance": 99,
+        "accessibility": 99,
+        "best-practices": 96,
+        "seo": 92
+      },
+      "lcpMs": 828.68992,
+      "cls": 0,
+      "tbtMs": 0,
+      "files": [
+        "127_0_0_1-nfts_nft_1-2026_11_03_20_13_01.report.json",
+        "127_0_0_1-nfts_nft_1-2026_11_03_20_13_21.report.json",
+        "127_0_0_1-nfts_nft_1-2026_11_03_20_13_40.report.json"
+      ],
+      "lighthouseVersion": "12.6.1",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.0.0 Safari/537.36"
+    }
+  ],
+  "complete": true
+}

@@ -1,0 +1,74 @@
+[
+  {
+    "url": "http://127.0.0.1:4175/",
+    "isRepresentativeRun": false,
+    "htmlPath": "C:\\Users\\vitor\\Documents\\kurio-lighthouse-evidence\\lighthouse-reports\\mobile\\127_0_0_1--2026_11_03_20_05_38.report.html",
+    "jsonPath": "C:\\Users\\vitor\\Documents\\kurio-lighthouse-evidence\\lighthouse-reports\\mobile\\127_0_0_1--2026_11_03_20_05_38.report.json",
+    "summary": {
+      "performance": 0.88,
+      "accessibility": 0.98,
+      "best-practices": 0.96,
+      "seo": 0.92
+    }
+  },
+  {
+    "url": "http://127.0.0.1:4175/",
+    "isRepresentativeRun": false,
+    "htmlPath": "C:\\Users\\vitor\\Documents\\kurio-lighthouse-evidence\\lighthouse-reports\\mobile\\127_0_0_1--2026_11_03_20_06_07.report.html",
+    "jsonPath": "C:\\Users\\vitor\\Documents\\kurio-lighthouse-evidence\\lighthouse-reports\\mobile\\127_0_0_1--2026_11_03_20_06_07.report.json",
+    "summary": {
+      "performance": 0.88,
+      "accessibility": 0.98,
+      "best-practices": 0.96,
+      "seo": 0.92
+    }
+  },
+  {
+    "url": "http://127.0.0.1:4175/nfts/nft-1",
+    "isRepresentativeRun": false,
+    "htmlPath": "C:\\Users\\vitor\\Documents\\kurio-lighthouse-evidence\\lighthouse-reports\\mobile\\127_0_0_1-nfts_nft_1-2026_11_03_20_06_48.report.html",
+    "jsonPath": "C:\\Users\\vitor\\Documents\\kurio-lighthouse-evidence\\lighthouse-reports\\mobile\\127_0_0_1-nfts_nft_1-2026_11_03_20_06_48.report.json",
+    "summary": {
+      "performance": 0.91,
+      "accessibility": 0.96,
+      "best-practices": 0.96,
+      "seo": 0.92
+    }
+  },
+  {
+    "url": "http://127.0.0.1:4175/nfts/nft-1",
+    "isRepresentativeRun": false,
+    "htmlPath": "C:\\Users\\vitor\\Documents\\kurio-lighthouse-evidence\\lighthouse-reports\\mobile\\127_0_0_1-nfts_nft_1-2026_11_03_20_07_29.report.html",
+    "jsonPath": "C:\\Users\\vitor\\Documents\\kurio-lighthouse-evidence\\lighthouse-reports\\mobile\\127_0_0_1-nfts_nft_1-2026_11_03_20_07_29.report.json",
+    "summary": {
+      "performance": 0.89,
+      "accessibility": 0.96,
+      "best-practices": 0.96,
+      "seo": 0.92
+    }
+  },
+  {
+    "url": "http://127.0.0.1:4175/",
+    "isRepresentativeRun": true,
+    "htmlPath": "C:\\Users\\vitor\\Documents\\kurio-lighthouse-evidence\\lighthouse-reports\\mobile\\127_0_0_1--2026_11_03_20_06_28.report.html",
+    "jsonPath": "C:\\Users\\vitor\\Documents\\kurio-lighthouse-evidence\\lighthouse-reports\\mobile\\127_0_0_1--2026_11_03_20_06_28.report.json",
+    "summary": {
+      "performance": 0.91,
+      "accessibility": 0.98,
+      "best-practices": 0.96,
+      "seo": 0.92
+    }
+  },
+  {
+    "url": "http://127.0.0.1:4175/nfts/nft-1",
+    "isRepresentativeRun": true,
+    "htmlPath": "C:\\Users\\vitor\\Documents\\kurio-lighthouse-evidence\\lighthouse-reports\\mobile\\127_0_0_1-nfts_nft_1-2026_11_03_20_07_08.report.html",
+    "jsonPath": "C:\\Users\\vitor\\Documents\\kurio-lighthouse-evidence\\lighthouse-reports\\mobile\\127_0_0_1-nfts_nft_1-2026_11_03_20_07_08.report.json",
+    "summary": {
+      "performance": 0.87,
+      "accessibility": 0.96,
+      "best-practices": 0.96,
+      "seo": 0.92
+    }
+  }
+]
