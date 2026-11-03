@@ -64,12 +64,12 @@ function Wallets(){
  {isPending?<Loading count={1}/>:wallets.map(w=><div key={w.id} className="panel" style={{marginBottom:12}}><div className="row" style={{justifyContent:'space-between'}}><b>{w.label} · {w.network} {w.primary?'· Principal':'· Secundária'}</b><button type="button" className="text-link" onClick={()=>{setEditId(w.id);setLabel(w.label);setAddress(w.address);setNetwork(w.network);setPrimary(w.primary)}}>Editar</button></div><p className="note" style={{wordBreak:'break-all'}}>{w.address}</p></div>)}
  <h2>{editId?'Editar carteira':'Adicionar carteira de teste'}</h2>
  <form onSubmit={e=>{e.preventDefault();m.mutate()}}><div className="field-grid">
- <label className="field"><span>Nome de exibição *</span><input required value={label} onChange={e=>setLabel(e.target.value)} placeholder="Minha carteira"/></label>
- <label className="field"><span>Apelido da carteira *</span><input required value={label} onChange={e=>setLabel(e.target.value)}/></label>
+
+ <label className="field"><span>Apelido da carteira *</span><input required value={label} onChange={e=>setLabel(e.target.value)} placeholder="Minha carteira"/></label>
  <label className="field"><span>Rede *</span><select value={network} onChange={e=>setNetwork(e.target.value as Wallet['network'])}><option>Ethereum</option><option>Polygon</option></select></label>
- <label className="field"><span>Nome do perfil *</span><input value={label} onChange={e=>setLabel(e.target.value)} required/></label>
+
  <label className="field"><span>Endereço da carteira *</span><input required pattern="0x[a-fA-F0-9]{40}" value={address} onChange={e=>setAddress(e.target.value)} placeholder="Endereço 0x da carteira"/></label>
- <label className="field"><span>ENS ou carteira secundária (opcional)</span><input disabled placeholder="Campo informativo da maquete"/></label></div>
+ </div>
  <label className="row" style={{margin:'20px 0'}}><input type="checkbox" checked={primary} onChange={e=>setPrimary(e.target.checked)}/> Definir como carteira principal</label>
  <div className="row"><Button type="submit" disabled={m.isPending}>{editId?'Atualizar carteira':'Salvar carteira'}</Button>{editId&&<Button type="button" variant="secondary" onClick={reset}>Cancelar</Button>}</div>
  {m.isError&&<Feedback message={errorMessage(m.error)}/>} {m.isSuccess&&<p role="status" className="success">Carteira salva.</p>}
