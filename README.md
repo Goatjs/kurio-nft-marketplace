@@ -53,6 +53,15 @@ npx playwright test
 
 Esses testes **não** alteram os componentes de produção. Cada teste inicia com reset determinístico via `POST /api/demo/reset`; os cenários de falha são configurados com `nft-scenario`. Verifique os resultados antes de registrar qualquer contagem de testes como aprovada.
 
+
+## Fase 9C — UI, contratos e estado do pedido
+
+- O perfil tem consulta autenticada `GET /api/profile` por Axios + handler MSW, com escopo por sessão. A tela usa TanStack Query (`['profile', userId]`) e invalida o cache de sessão após edição.
+- `Input`, `Button` e `Card` seguem a composição shadcn/ui (forwardRef, className/cn, CVA/Slot no Button) e agora aplicam utilitários Tailwind reais mantendo os estilos Kurio já existentes. `cn` utiliza `tailwind-merge`.
+- Recibos pendentes, confirmados e recusados usam ícones semanticamente diferentes, com rótulo acessível.
+- Testes novos: `tests/phase9c-contract-ui.spec.ts` em Chromium desktop/mobile. Nenhuma integração real de pagamentos ou wallet é adicionada.
+- Após instalação: executar lint, build, novos testes, suíte completa e regressão visual; resultados ainda dependem de validação local.
+
 ## Evidências de validação
 
 Resultados reportados após execução em Windows/Chrome, em **02/11/2026**. As pontuações podem variar conforme hardware, navegador e rede.

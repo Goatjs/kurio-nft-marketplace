@@ -105,6 +105,7 @@ export const api={
  placeOrder:(quoteId:string,walletId:string,key:string)=>data(httpClient.post<Order>('/orders',{quoteId,walletId},{headers:{'Idempotency-Key':key}})),
  order:(id:string)=>data(httpClient.get<Order>(`/orders/${id}`)),
  orderByKey:(key:string)=>data(httpClient.get<Order>(`/orders/by-key/${encodeURIComponent(key)}`)),
+ profileDetail:()=>data(httpClient.get<User>('/profile')),
  profile:(dataIn:Partial<Pick<User,'name'|'avatar'|'username'|'email'|'ens'|'walletAlias'>>)=>data(httpClient.put<User>('/profile',dataIn)),
  changePassword:(current:string,next:string)=>data(httpClient.post('/profile/password',{current,next})),
  wallets:()=>data(httpClient.get<Wallet[]>('/wallets')),

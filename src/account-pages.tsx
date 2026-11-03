@@ -5,6 +5,7 @@ import {UserRound,Wallet as WalletIcon,LogOut,ImageIcon} from 'lucide-react';
 import {api} from './api';
 import type {Wallet} from './contracts';
 import {Button} from './components/ui/button';
+import {Input} from './components/ui/input';
 import {useSession,errorMessage} from './state';
 import {clearIdentity} from './live';
 
@@ -21,33 +22,34 @@ function AccountShell({section,children}:{section:'profile'|'wallets';children:R
 export function ProfilePage(){return <Required><Profile/></Required>}
 function Profile(){
  const {data:user}=useSession();const qc=useQueryClient();
+ const {data:profileData}=useQuery({queryKey:['profile',user?.id],queryFn:api.profileDetail,enabled:!!user,retry:false});
  const [name,setName]=useState(user?.name??'');const [email,setEmail]=useState(user?.email??'');
  const [username,setUsername]=useState(user?.username??'');const [ens,setEns]=useState(user?.ens??'');
  const [walletAlias,setWalletAlias]=useState(user?.walletAlias??'');const [avatar,setAvatar]=useState(user?.avatar??'');
  const [current,setCurrent]=useState('');const [next,setNext]=useState('');const [confirm,setConfirm]=useState('');
  const [passError,setPassError]=useState('');
- useEffect(()=>{setName(user?.name??'');setEmail(user?.email??'');setUsername(user?.username??'');setEns(user?.ens??'');setWalletAlias(user?.walletAlias??'');setAvatar(user?.avatar??'')},[user]);
- const m=useMutation({mutationFn:()=>api.profile({name,email,username,ens,walletAlias,avatar}),onSuccess:()=>void qc.invalidateQueries({queryKey:['session']})});
+ useEffect(()=>{const record=profileData??user;setName(record?.name??'');setEmail(record?.email??'');setUsername(record?.username??'');setEns(record?.ens??'');setWalletAlias(record?.walletAlias??'');setAvatar(record?.avatar??'')},[profileData,user]);
+ const m=useMutation({mutationFn:()=>api.profile({name,email,username,ens,walletAlias,avatar}),onSuccess:updated=>{qc.setQueryData(['profile',updated.id],updated);void qc.invalidateQueries({queryKey:['session']})}});
  const pass=useMutation({mutationFn:()=>api.changePassword(current,next),onSuccess:()=>{setCurrent('');setNext('');setConfirm('')}});
  return <AccountShell section="profile"><h1>Perfil do colecionador</h1>
  <form onSubmit={e=>{e.preventDefault();m.mutate()}}>
   <div className="field-grid">
-   <label className="field"><span>Nome de exibição *</span><input required value={name} onChange={e=>setName(e.target.value)}/></label>
-   <label className="field"><span>Nome de usuário *</span><input required value={username} onChange={e=>setUsername(e.target.value)} placeholder="colecionador"/></label>
-   <label className="field"><span>E-mail *</span><input type="email" required value={email} onChange={e=>setEmail(e.target.value)}/></label>
-   <label className="field"><span>Nome ENS</span><input value={ens} onChange={e=>setEns(e.target.value)} placeholder=".eth"/></label>
-   <label className="field"><span>Apelido da carteira</span><input value={walletAlias} onChange={e=>setWalletAlias(e.target.value)} placeholder="Principal"/></label>
+   <label className="field"><span>Nome de exibição *</span><Input required value={name} onChange={e=>setName(e.target.value)}/></label>
+   <label className="field"><span>Nome de usuário *</span><Input required value={username} onChange={e=>setUsername(e.target.value)} placeholder="colecionador"/></label>
+   <label className="field"><span>E-mail *</span><Input type="email" required value={email} onChange={e=>setEmail(e.target.value)}/></label>
+   <label className="field"><span>Nome ENS</span><Input value={ens} onChange={e=>setEns(e.target.value)} placeholder=".eth"/></label>
+   <label className="field"><span>Apelido da carteira</span><Input value={walletAlias} onChange={e=>setWalletAlias(e.target.value)} placeholder="Principal"/></label>
    <label className="field"><span>Avatar</span><span className="row" style={{gap:12}}>{avatar?<img src={avatar} alt="Seu avatar" style={{width:45,height:45,objectFit:'cover',borderRadius:'50%'}}/>:<span className="footer-disc" style={{width:42,height:42,margin:0}}><ImageIcon size={16}/></span>}
-    <input aria-label="URL do avatar" value={avatar} onChange={e=>setAvatar(e.target.value)} placeholder="URL da imagem"/></span></label>
+    <Input aria-label="URL do avatar" value={avatar} onChange={e=>setAvatar(e.target.value)} placeholder="URL da imagem"/></span></label>
   </div>
   <Button type="submit" style={{marginTop:25}} disabled={m.isPending}>Salvar perfil</Button>
   {m.isSuccess&&<p role="status" className="success">Perfil atualizado com sucesso.</p>}{m.isError&&<Feedback message={errorMessage(m.error)}/>}
  </form>
  <form onSubmit={e=>{e.preventDefault();setPassError('');if(next!==confirm){setPassError('Confirmação de senha diferente.');return}pass.mutate()}}>
   <h2>Alterar senha</h2><div className="field-grid">
-   <label className="field"><span>Senha atual</span><input type="password" autoComplete="current-password" required value={current} onChange={e=>setCurrent(e.target.value)}/></label><span/>
-   <label className="field"><span>Nova senha</span><input type="password" autoComplete="new-password" required minLength={8} value={next} onChange={e=>setNext(e.target.value)}/></label><span/>
-   <label className="field"><span>Confirmar nova senha</span><input type="password" autoComplete="new-password" required minLength={8} value={confirm} onChange={e=>setConfirm(e.target.value)}/></label>
+   <label className="field"><span>Senha atual</span><Input type="password" autoComplete="current-password" required value={current} onChange={e=>setCurrent(e.target.value)}/></label><span/>
+   <label className="field"><span>Nova senha</span><Input type="password" autoComplete="new-password" required minLength={8} value={next} onChange={e=>setNext(e.target.value)}/></label><span/>
+   <label className="field"><span>Confirmar nova senha</span><Input type="password" autoComplete="new-password" required minLength={8} value={confirm} onChange={e=>setConfirm(e.target.value)}/></label>
   </div><Button type="submit" style={{marginTop:25}} disabled={pass.isPending}>Alterar senha</Button>
   {passError&&<Feedback message={passError}/>} {pass.isError&&<Feedback message={errorMessage(pass.error)}/>} {pass.isSuccess&&<p className="success" role="status">Senha alterada.</p>}
  </form>
@@ -65,10 +67,10 @@ function Wallets(){
  <h2>{editId?'Editar carteira':'Adicionar carteira de teste'}</h2>
  <form onSubmit={e=>{e.preventDefault();m.mutate()}}><div className="field-grid">
 
- <label className="field"><span>Apelido da carteira *</span><input required value={label} onChange={e=>setLabel(e.target.value)} placeholder="Minha carteira"/></label>
+ <label className="field"><span>Apelido da carteira *</span><Input required value={label} onChange={e=>setLabel(e.target.value)} placeholder="Minha carteira"/></label>
  <label className="field"><span>Rede *</span><select value={network} onChange={e=>setNetwork(e.target.value as Wallet['network'])}><option>Ethereum</option><option>Polygon</option></select></label>
 
- <label className="field"><span>Endereço da carteira *</span><input required pattern="0x[a-fA-F0-9]{40}" value={address} onChange={e=>setAddress(e.target.value)} placeholder="Endereço 0x da carteira"/></label>
+ <label className="field"><span>Endereço da carteira *</span><Input required pattern="0x[a-fA-F0-9]{40}" value={address} onChange={e=>setAddress(e.target.value)} placeholder="Endereço 0x da carteira"/></label>
  </div>
  <label className="row" style={{margin:'20px 0'}}><input type="checkbox" checked={primary} onChange={e=>setPrimary(e.target.checked)}/> Definir como carteira principal</label>
  <div className="row"><Button type="submit" disabled={m.isPending}>{editId?'Atualizar carteira':'Salvar carteira'}</Button>{editId&&<Button type="button" variant="secondary" onClick={reset}>Cancelar</Button>}</div>
